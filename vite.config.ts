@@ -3,7 +3,6 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { lingui } from "@lingui/vite-plugin";
-import { cloudflare } from "@cloudflare/vite-plugin";
 import { resolve } from "path";
 
 export default defineConfig({
@@ -11,9 +10,7 @@ export default defineConfig({
     port: 3000,
   },
 
-  // Plugin order matters - cloudflare first, then tanstackStart BEFORE viteReact
   plugins: [
-    cloudflare({ viteEnvironment: { name: "ssr" } }),
     tsConfigPaths({
       projects: ["./tsconfig.json"],
     }),
@@ -43,7 +40,6 @@ export default defineConfig({
   },
 
   build: {
-    outDir: "dist",
     target: "esnext",
   },
 });
