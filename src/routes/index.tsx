@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { Trans, useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react";
+import { t } from "@lingui/macro";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 function isValidUrl(url: string): boolean {
@@ -18,7 +19,6 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const navigate = useNavigate();
-  const { _: t } = useLingui();
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -27,12 +27,12 @@ function HomePage() {
     setError(null);
 
     if (!url.trim()) {
-      setError(t({ id: "Please enter a URL", message: "Please enter a URL" }));
+      setError(t`Please enter a URL`);
       return;
     }
 
     if (!isValidUrl(url)) {
-      setError(t({ id: "Please enter a valid HTTP or HTTPS URL", message: "Please enter a valid HTTP or HTTPS URL" }));
+      setError(t`Please enter a valid HTTP or HTTPS URL`);
       return;
     }
 
@@ -61,7 +61,7 @@ function HomePage() {
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder={t({ id: "Enter a Mastodon or Fediverse post URL", message: "Enter a Mastodon or Fediverse post URL" })}
+              placeholder={t`Enter a Mastodon or Fediverse post URL`}
               className="url-input"
               aria-label="Post URL"
             />

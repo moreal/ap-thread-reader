@@ -40,3 +40,4 @@ yarn-error.log*
 .claude/settings.local.json
 app.config.*.js
 .wrangler
+**/*.mjs

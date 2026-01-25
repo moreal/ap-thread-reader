@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trans, useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react";
+import { t } from "@lingui/macro";
 import { ThreadView } from "@/components/ThreadView";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { fetchThreadData, type ThreadResult } from "@/lib/api.functions";
@@ -50,7 +51,6 @@ function LoadingPage() {
 
 function ReadPage() {
   const { thread, error } = Route.useLoaderData();
-  const { _: t } = useLingui();
 
   return (
     <div className="container">
@@ -80,7 +80,7 @@ function ReadPage() {
           <>
             <div className="thread-meta">
               <p>
-                {t({ id: "{count} posts in this thread", message: "{count} posts in this thread" }, { count: thread.length })}
+                {t`${thread.length} posts in this thread`}
               </p>
               {thread[0].url && (
                 <a

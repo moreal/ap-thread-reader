@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "lingui compile && vite build",
     "preview": "vite preview",
     "deploy": "yarn build && wrangler deploy",
     "cli": "tsx scripts/cli.ts",
