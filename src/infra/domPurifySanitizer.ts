@@ -1,4 +1,4 @@
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import type { SanitizeHtmlFn, SanitizerOptions } from "@/domain/sanitizer";
 import {
   DEFAULT_ALLOWED_TAGS,
