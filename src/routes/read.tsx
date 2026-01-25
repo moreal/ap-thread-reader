@@ -1,23 +1,40 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trans } from "@lingui/react";
+import { useEffect, useState } from "react";
 import { ThreadView } from "@/components/ThreadView";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { fetchThreadData, type ThreadResult } from "@/lib/api.functions";
 
 interface ReadSearchParams {
   url: string;
+  ssr?: boolean;
+}
+
+interface LoaderResult extends ThreadResult {
+  /** When true, data should be fetched on the client */
+  pending?: boolean;
+  url: string;
 }
 
 export const Route = createFileRoute("/read")({
   validateSearch: (search: Record<string, unknown>): ReadSearchParams => ({
     url: (search.url as string) || "",
+    ssr: search.ssr === "true" || search.ssr === true,
   }),
-  loaderDeps: ({ search }) => ({ url: search.url }),
-  loader: async ({ deps }): Promise<ThreadResult> => {
+  loaderDeps: ({ search }) => ({ url: search.url, ssr: search.ssr }),
+  loader: async ({ deps }): Promise<LoaderResult> => {
     if (!deps.url) {
-      return { thread: null, error: "No URL provided" };
+      return { thread: null, error: "No URL provided", url: deps.url };
     }
-    return fetchThreadData({ data: deps.url });
+
+    // Only fetch on server when ssr=true
+    if (deps.ssr) {
+      const result = await fetchThreadData({ data: deps.url });
+      return { ...result, url: deps.url };
+    }
+
+    // Otherwise, return pending state for client-side fetch
+    return { thread: null, error: null, pending: true, url: deps.url };
   },
   pendingComponent: LoadingPage,
   component: ReadPage,
@@ -48,7 +65,35 @@ function LoadingPage() {
 }
 
 function ReadPage() {
-  const { thread, error } = Route.useLoaderData();
+  const loaderData = Route.useLoaderData();
+  const [data, setData] = useState<ThreadResult>({
+    thread: loaderData.thread,
+    error: loaderData.error,
+  });
+  const [loading, setLoading] = useState(loaderData.pending ?? false);
+
+  useEffect(() => {
+    if (loaderData.pending && loaderData.url) {
+      setLoading(true);
+      fetchThreadData({ data: loaderData.url })
+        .then(setData)
+        .finally(() => setLoading(false));
+    }
+  }, [loaderData.pending, loaderData.url]);
+
+  // Sync with loader data when it changes (e.g., ssr=true case)
+  useEffect(() => {
+    if (!loaderData.pending) {
+      setData({ thread: loaderData.thread, error: loaderData.error });
+      setLoading(false);
+    }
+  }, [loaderData.pending, loaderData.thread, loaderData.error]);
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  const { thread, error } = data;
 
   return (
     <div className="container">
