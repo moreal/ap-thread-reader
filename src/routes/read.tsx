@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trans } from "@lingui/react";
-import { t } from "@lingui/macro";
 import { ThreadView } from "@/components/ThreadView";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { fetchThreadData, type ThreadResult } from "@/lib/api.functions";
@@ -73,24 +72,7 @@ function ReadPage() {
           </div>
         )}
 
-        {thread && thread.length > 0 && (
-          <>
-            <div className="thread-meta">
-              <p>{t`${thread.length} posts in this thread`}</p>
-              {thread[0].url && (
-                <a
-                  href={thread[0].url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="original-link"
-                >
-                  <Trans id="View original" message="View original" />
-                </a>
-              )}
-            </div>
-            <ThreadView thread={thread} />
-          </>
-        )}
+        {thread && thread.length > 0 && <ThreadView thread={thread} />}
 
         {thread && thread.length === 0 && !error && (
           <div className="thread-empty">
