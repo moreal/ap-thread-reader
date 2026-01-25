@@ -52,9 +52,11 @@ function LoadingPage() {
             <Trans id="← Back" message="← Back" />
           </Link>
         )}
-        <h1 className="header__title">
-          <Trans id="Thread Reader" message="Thread Reader" />
-        </h1>
+        <Link to="/" className="header__title-link">
+          <h1 className="header__title">
+            <Trans id="Thread Reader" message="Thread Reader" />
+          </h1>
+        </Link>
         <LocaleSwitcher />
       </header>
       <main id="main-content" className="thread-content">
@@ -110,9 +112,11 @@ function ReadPage() {
             <Trans id="← Back" message="← Back" />
           </Link>
         )}
-        <h1 className="header__title">
-          <Trans id="Thread Reader" message="Thread Reader" />
-        </h1>
+        <Link to="/" className="header__title-link">
+          <h1 className="header__title">
+            <Trans id="Thread Reader" message="Thread Reader" />
+          </h1>
+        </Link>
         <LocaleSwitcher />
       </header>
 

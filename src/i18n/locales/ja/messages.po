@@ -15,8 +15,8 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/components/ThreadView.tsx:53
-msgid "Original"
-msgstr "元の投稿"
+#~ msgid "Original"
+#~ msgstr "元の投稿"
 
 #. js-lingui-explicit-id
 #: src/routes/read.tsx:92
@@ -29,7 +29,7 @@ msgstr "元の投稿"
 
 #. js-lingui-explicit-id
 #: src/routes/read.tsx:52
-#: src/routes/read.tsx:110
+#: src/routes/read.tsx:112
 msgid "← Back"
 msgstr "← 戻る"
 
@@ -63,12 +63,12 @@ msgid "How to use"
 msgstr "使い方"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:64
+#: src/routes/read.tsx:66
 msgid "Loading thread..."
 msgstr "スレッドを読み込み中..."
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:134
+#: src/routes/read.tsx:138
 msgid "No posts found in thread"
 msgstr "スレッドに投稿が見つかりません"
 
@@ -97,12 +97,12 @@ msgstr "スレッドを読む"
 
 #. js-lingui-explicit-id
 #: src/routes/index.tsx:54
-#: src/routes/read.tsx:56
-#: src/routes/read.tsx:114
+#: src/routes/read.tsx:57
+#: src/routes/read.tsx:117
 msgid "Thread Reader"
 msgstr "スレッドリーダー"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:124
+#: src/routes/read.tsx:128
 msgid "Try another URL"
 msgstr "別のURLを試す"

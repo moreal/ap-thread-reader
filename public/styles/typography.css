@@ -99,13 +99,29 @@ body {
 /* Header */
 .header {
   text-align: center;
+  padding-top: var(--spacing-2xl);
   margin-bottom: var(--spacing-2xl);
 }
 
 .header h1 {
   font-size: 2rem;
   font-weight: 700;
+  letter-spacing: -0.025em;
   margin-bottom: var(--spacing-sm);
+}
+
+.header .subtitle {
+  margin-bottom: var(--spacing-lg);
+}
+
+.header .locale-switcher {
+  opacity: 0.7;
+  transition: opacity 0.2s ease-out;
+}
+
+.header .locale-switcher:hover,
+.header .locale-switcher:focus-within {
+  opacity: 1;
 }
 
 /* Compact Header (for read page) */
@@ -114,6 +130,7 @@ body {
   justify-content: space-between;
   align-items: center;
   text-align: left;
+  padding-top: 0;
   margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--color-border);
@@ -124,6 +141,24 @@ body {
   font-weight: 600;
   margin: 0;
   color: var(--color-text-muted);
+}
+
+.header__title-link,
+.header__title-link:hover,
+.header__title-link:focus,
+.header__title-link:active {
+  text-decoration: none;
+  color: inherit;
+}
+
+.header__title-link {
+  transition: color 0.2s ease-out;
+}
+
+@media (hover: hover) {
+  .header__title-link:hover .header__title {
+    color: var(--color-text);
+  }
 }
 
 .subtitle {
@@ -453,6 +488,17 @@ body {
   color: inherit;
 }
 
+.post-time-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .post-time-link:hover {
+    text-decoration: underline;
+  }
+}
+
 .post-link {
   color: var(--color-primary);
   text-decoration: none;
@@ -474,6 +520,7 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   background-color: var(--color-background);
+  color: var(--color-text);
   font-size: 0.875rem;
   cursor: pointer;
 }
@@ -482,6 +529,11 @@ body {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: var(--focus-ring);
+}
+
+.locale-select option {
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 /* Screen reader only */
@@ -544,7 +596,7 @@ body {
     gap: var(--spacing-xs);
   }
 
-  .header--compact .header__title {
+  .header--compact .header__title-link {
     order: -1;
     width: 100%;
     text-align: center;

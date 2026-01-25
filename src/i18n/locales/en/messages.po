@@ -15,8 +15,8 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/components/ThreadView.tsx:53
-msgid "Original"
-msgstr "Original"
+#~ msgid "Original"
+#~ msgstr "Original"
 
 #. js-lingui-explicit-id
 #: src/routes/read.tsx:92
@@ -29,7 +29,7 @@ msgstr "Original"
 
 #. js-lingui-explicit-id
 #: src/routes/read.tsx:52
-#: src/routes/read.tsx:110
+#: src/routes/read.tsx:112
 msgid "← Back"
 msgstr "← Back"
 
@@ -63,12 +63,12 @@ msgid "How to use"
 msgstr "How to use"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:64
+#: src/routes/read.tsx:66
 msgid "Loading thread..."
 msgstr "Loading thread..."
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:134
+#: src/routes/read.tsx:138
 msgid "No posts found in thread"
 msgstr "No posts found in thread"
 
@@ -97,12 +97,12 @@ msgstr "Read Thread"
 
 #. js-lingui-explicit-id
 #: src/routes/index.tsx:54
-#: src/routes/read.tsx:56
-#: src/routes/read.tsx:114
+#: src/routes/read.tsx:57
+#: src/routes/read.tsx:117
 msgid "Thread Reader"
 msgstr "Thread Reader"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:124
+#: src/routes/read.tsx:128
 msgid "Try another URL"
 msgstr "Try another URL"

@@ -1,6 +1,5 @@
 import type { Thread } from "@/domain/types";
 import { PostContent } from "./PostContent";
-import { Trans } from "@lingui/react";
 
 export interface ThreadViewProps {
   thread: Thread;
@@ -38,21 +37,21 @@ export function ThreadView({ thread }: ThreadViewProps) {
           )
         )}
         <span className="meta-separator">·</span>
-        <time dateTime={firstPost.publishedAt} className="post-time">
-          {new Date(firstPost.publishedAt).toLocaleString()}
-        </time>
-        {firstPost.url && (
-          <>
-            <span className="meta-separator">·</span>
-            <a
-              href={firstPost.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="original-link"
-            >
-              <Trans id="Original" />
-            </a>
-          </>
+        {firstPost.url ? (
+          <a
+            href={firstPost.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="post-time-link"
+          >
+            <time dateTime={firstPost.publishedAt}>
+              {new Date(firstPost.publishedAt).toLocaleString()}
+            </time>
+          </a>
+        ) : (
+          <time dateTime={firstPost.publishedAt} className="post-time">
+            {new Date(firstPost.publishedAt).toLocaleString()}
+          </time>
         )}
       </header>
       {thread.map((post, index) => (
