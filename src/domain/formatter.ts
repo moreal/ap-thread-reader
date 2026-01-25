@@ -27,9 +27,7 @@ export function formatPost(post: Post, options: FormatOptions = {}): string {
   parts.push(`<time datetime="${post.publishedAt}">${post.publishedAt}</time>`);
 
   if (post.url) {
-    parts.push(
-      ` | <a href="${post.url}" target="_blank" rel="noopener noreferrer">원본</a>`
-    );
+    parts.push(` | <a href="${post.url}" target="_blank" rel="noopener noreferrer">원본</a>`);
   }
 
   parts.push("</footer>");
@@ -40,10 +38,7 @@ export function formatPost(post: Post, options: FormatOptions = {}): string {
 /**
  * 스레드를 문자열로 포맷팅합니다.
  */
-export function formatThread(
-  thread: Thread,
-  options: FormatOptions = {}
-): string {
+export function formatThread(thread: Thread, options: FormatOptions = {}): string {
   if (thread.length === 0) {
     return "";
   }
@@ -65,7 +60,7 @@ export function formatThreadAsHtml(thread: Thread): string {
     .map(
       (post) => `<article class="post" data-post-id="${post.id}">
   <div class="post-content">${post.content}</div>
-</article>`
+</article>`,
     )
     .join("\n");
 }

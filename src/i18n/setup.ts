@@ -8,16 +8,12 @@ export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const DEFAULT_LOCALE: SupportedLocale = "en";
 
 // Vite glob import for locale catalogs (compiled .mjs files)
-const catalogs = import.meta.glob<{ messages: Messages }>(
-  "./locales/*/messages.mjs"
-);
+const catalogs = import.meta.glob<{ messages: Messages }>("./locales/*/messages.mjs");
 
 /**
  * 로케일의 메시지 카탈로그를 동적으로 로드합니다.
  */
-export async function loadCatalog(
-  locale: SupportedLocale
-): Promise<Messages | null> {
+export async function loadCatalog(locale: SupportedLocale): Promise<Messages | null> {
   try {
     const path = `./locales/${locale}/messages.mjs`;
     const loader = catalogs[path];
@@ -58,9 +54,7 @@ export async function activateLocale(locale: SupportedLocale): Promise<void> {
 /**
  * 브라우저 또는 Accept-Language 헤더에서 로케일을 감지합니다.
  */
-export function detectLocale(
-  acceptLanguage?: string | null
-): SupportedLocale {
+export function detectLocale(acceptLanguage?: string | null): SupportedLocale {
   // Accept-Language 헤더에서 감지
   if (acceptLanguage) {
     for (const locale of SUPPORTED_LOCALES) {

@@ -10,9 +10,7 @@ import { sanitizerLogger } from "@/logging";
 /**
  * DOMPurify 기반 HTML Sanitizer를 생성합니다.
  */
-export function createDOMPurifySanitizer(
-  options: SanitizerOptions = {}
-): SanitizeHtmlFn {
+export function createDOMPurifySanitizer(options: SanitizerOptions = {}): SanitizeHtmlFn {
   const allowedTags = options.allowedTags ?? DEFAULT_ALLOWED_TAGS;
   const forbiddenTags = options.forbiddenTags ?? DEFAULT_FORBIDDEN_TAGS;
   const allowedAttributes = options.allowedAttributes ?? DEFAULT_ALLOWED_ATTRIBUTES;

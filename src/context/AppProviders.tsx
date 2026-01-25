@@ -55,23 +55,22 @@ export function AppProviders({ children, locale }: AppProvidersProps) {
   useEffect(() => {
     // 브라우저에서만 DOMPurify 로드
     import("dompurify").then((DOMPurify) => {
-      setSanitizer(() => (html: string) =>
-        DOMPurify.default.sanitize(html, {
-          ALLOWED_TAGS: DEFAULT_ALLOWED_TAGS,
-          FORBID_TAGS: DEFAULT_FORBIDDEN_TAGS,
-          ALLOWED_ATTR: DEFAULT_ALLOWED_ATTRIBUTES,
-          ALLOW_DATA_ATTR: false,
-          ALLOW_ARIA_ATTR: false,
-        })
+      setSanitizer(
+        () => (html: string) =>
+          DOMPurify.default.sanitize(html, {
+            ALLOWED_TAGS: DEFAULT_ALLOWED_TAGS,
+            FORBID_TAGS: DEFAULT_FORBIDDEN_TAGS,
+            ALLOWED_ATTR: DEFAULT_ALLOWED_ATTRIBUTES,
+            ALLOW_DATA_ATTR: false,
+            ALLOW_ARIA_ATTR: false,
+          }),
       );
     });
   }, []);
 
   return (
     <I18nProvider i18n={i18n} key={currentLocale}>
-      <SanitizerProvider sanitizer={sanitizer}>
-        {children}
-      </SanitizerProvider>
+      <SanitizerProvider sanitizer={sanitizer}>{children}</SanitizerProvider>
     </I18nProvider>
   );
 }

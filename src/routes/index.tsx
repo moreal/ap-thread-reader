@@ -49,7 +49,10 @@ function HomePage() {
           <Trans id="Thread Reader" message="Thread Reader" />
         </h1>
         <p className="subtitle">
-          <Trans id="Read Fediverse threads as a single article" message="Read Fediverse threads as a single article" />
+          <Trans
+            id="Read Fediverse threads as a single article"
+            message="Read Fediverse threads as a single article"
+          />
         </p>
         <LocaleSwitcher />
       </header>
@@ -78,13 +81,22 @@ function HomePage() {
           </h2>
           <ol>
             <li>
-              <Trans id="Find a thread on Mastodon or any Fediverse platform" message="Find a thread on Mastodon or any Fediverse platform" />
+              <Trans
+                id="Find a thread on Mastodon or any Fediverse platform"
+                message="Find a thread on Mastodon or any Fediverse platform"
+              />
             </li>
             <li>
-              <Trans id="Copy the URL of the first post in the thread" message="Copy the URL of the first post in the thread" />
+              <Trans
+                id="Copy the URL of the first post in the thread"
+                message="Copy the URL of the first post in the thread"
+              />
             </li>
             <li>
-              <Trans id='Paste it above and click "Read Thread"' message='Paste it above and click "Read Thread"' />
+              <Trans
+                id='Paste it above and click "Read Thread"'
+                message='Paste it above and click "Read Thread"'
+              />
             </li>
           </ol>
         </section>

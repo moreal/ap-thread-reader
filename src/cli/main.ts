@@ -73,7 +73,10 @@ export async function main(args: string[], options: CliOptions = {}): Promise<nu
 /**
  * CLI 인자 파싱
  */
-export function parseArgs(args: string[]): { urls: string[]; options: CliOptions } {
+export function parseArgs(args: string[]): {
+  urls: string[];
+  options: CliOptions;
+} {
   const options: CliOptions = {};
   const urls: string[] = [];
 

@@ -56,13 +56,7 @@ export const DEFAULT_FORBIDDEN_TAGS = [
 /**
  * 기본 허용 속성 목록
  */
-export const DEFAULT_ALLOWED_ATTRIBUTES = [
-  "href",
-  "rel",
-  "target",
-  "class",
-  "title",
-];
+export const DEFAULT_ALLOWED_ATTRIBUTES = ["href", "rel", "target", "class", "title"];
 
 /**
  * No-op sanitizer: 입력을 그대로 반환

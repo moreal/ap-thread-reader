@@ -9,8 +9,9 @@
   --color-border: #e5e7eb;
   --color-error: #dc2626;
   --color-error-bg: #fef2f2;
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -105,7 +106,9 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .url-input:focus {

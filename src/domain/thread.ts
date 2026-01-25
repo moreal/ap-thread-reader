@@ -29,7 +29,7 @@ export function filterSelfReplies(replies: Post[], authorId: string): Post[] {
  */
 export async function getPossibleThreads(
   startPostId: PostId,
-  deps: ThreadCollectorDeps
+  deps: ThreadCollectorDeps,
 ): Promise<Thread[]> {
   const startPost = await deps.fetchPost(startPostId);
   if (!startPost) {
@@ -39,10 +39,7 @@ export async function getPossibleThreads(
   const authorId = startPost.authorId;
   const threads: Thread[] = [];
 
-  async function collectThreads(
-    currentPost: Post,
-    currentThread: Thread
-  ): Promise<void> {
+  async function collectThreads(currentPost: Post, currentThread: Thread): Promise<void> {
     const replies = await deps.fetchReplies(currentPost.id);
     const selfReplies = filterSelfReplies(replies, authorId);
 
@@ -67,7 +64,7 @@ export async function getPossibleThreads(
  */
 export async function getLongestThread(
   startPostId: PostId,
-  deps: ThreadCollectorDeps
+  deps: ThreadCollectorDeps,
 ): Promise<Thread> {
   const threads = await getPossibleThreads(startPostId, deps);
 
@@ -77,6 +74,6 @@ export async function getLongestThread(
 
   // 가장 긴 스레드 반환
   return threads.reduce((longest, current) =>
-    current.length > longest.length ? current : longest
+    current.length > longest.length ? current : longest,
   );
 }

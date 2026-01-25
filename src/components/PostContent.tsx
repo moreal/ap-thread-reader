@@ -1,5 +1,6 @@
 import type { Post } from "@/domain/types";
 import { useSanitizer } from "@/hooks/useSanitizer";
+import { Trans } from "@lingui/react";
 
 export interface PostContentProps {
   post: Post;
@@ -15,27 +16,15 @@ export function PostContent({ post, index }: PostContentProps) {
   const sanitizedContent = sanitize(post.content);
 
   return (
-    <section
-      className="post"
-      data-post-id={post.id}
-      aria-label={`Post ${index + 1}`}
-    >
-      <div
-        className="post-content"
-        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-      />
+    <section className="post" data-post-id={post.id} aria-label={`Post ${index + 1}`}>
+      <div className="post-content" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
       <footer className="post-footer">
         <time dateTime={post.publishedAt} className="post-time">
           {new Date(post.publishedAt).toLocaleString()}
         </time>
         {post.url && (
-          <a
-            href={post.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="post-link"
-          >
-            Original
+          <a href={post.url} target="_blank" rel="noopener noreferrer" className="post-link">
+            <Trans id="Original" />
           </a>
         )}
       </footer>

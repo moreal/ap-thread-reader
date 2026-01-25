@@ -30,7 +30,7 @@ export function toPost(obj: APObject): Post | null {
   const publishedAt = published?.toString() ?? new Date().toISOString();
   const inReplyTo = obj.replyTargetId?.href ?? null;
   const objUrl = obj.url;
-  const url = objUrl instanceof URL ? objUrl.href : (typeof objUrl === "string" ? objUrl : null);
+  const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
 
   return {
     id,
@@ -75,7 +75,7 @@ export async function fetchPost(postId: PostId): Promise<Post | null> {
  * CollectionPage를 순회하며 아이템을 수집합니다.
  */
 async function* iterateCollectionPages(
-  firstPage: Awaited<ReturnType<typeof import("@fedify/fedify").Collection.prototype.getFirst>>
+  firstPage: Awaited<ReturnType<typeof import("@fedify/fedify").Collection.prototype.getFirst>>,
 ): AsyncGenerator<APObject> {
   let currentPage = firstPage;
   const seenUrls = new Set<string>();

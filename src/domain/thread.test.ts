@@ -1,9 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import {
-  getPossibleThreads,
-  getLongestThread,
-  filterSelfReplies,
-} from "./thread";
+import { getPossibleThreads, getLongestThread, filterSelfReplies } from "./thread";
 import type { Post, PostId, ThreadCollectorDeps } from "./types";
 
 // 테스트용 Mock Post 생성 헬퍼
@@ -35,14 +31,9 @@ describe("filterSelfReplies", () => {
   });
 
   it("self-reply가 없으면 빈 배열 반환", () => {
-    const replies: Post[] = [
-      createMockPost({ authorId: "https://example.com/users/bob" }),
-    ];
+    const replies: Post[] = [createMockPost({ authorId: "https://example.com/users/bob" })];
 
-    const result = filterSelfReplies(
-      replies,
-      "https://example.com/users/alice"
-    );
+    const result = filterSelfReplies(replies, "https://example.com/users/alice");
 
     expect(result).toHaveLength(0);
   });

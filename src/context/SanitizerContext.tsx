@@ -12,15 +12,8 @@ export interface SanitizerProviderProps {
 /**
  * Sanitizer를 Context로 제공합니다.
  */
-export function SanitizerProvider({
-  sanitizer,
-  children,
-}: SanitizerProviderProps) {
-  return (
-    <SanitizerContext.Provider value={sanitizer}>
-      {children}
-    </SanitizerContext.Provider>
-  );
+export function SanitizerProvider({ sanitizer, children }: SanitizerProviderProps) {
+  return <SanitizerContext.Provider value={sanitizer}>{children}</SanitizerContext.Provider>;
 }
 
 /**

@@ -1,9 +1,4 @@
-import {
-  Outlet,
-  createRootRoute,
-  HeadContent,
-  Scripts,
-} from "@tanstack/react-router";
+import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AppProviders } from "@/context/AppProviders";
 
 export const Route = createRootRoute({

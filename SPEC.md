@@ -5,11 +5,13 @@
 ActivityPub 프로토콜을 활용하여 Mastodon 등의 Fediverse 플랫폼에서 작성된 스레드를 하나의 긴 글처럼 읽을 수 있게 해주는 웹 서비스입니다.
 
 ### 배경
+
 - Mastodon에는 글자 수 제한(기본 500자)이 있어 Twitter처럼 긴 스레드로 글을 작성하는 경우가 있음
 - ActivityPub 프로토콜 자체에는 길이 제한이 없으나 구현체마다 다름
 - 스레드 형태의 글은 읽기 불편하므로 하나의 글처럼 연결하여 보여주고자 함
 
 ### 핵심 기능
+
 - ActivityPub 포스트 URL을 입력받아 해당 포스트부터 시작하는 self-reply 스레드를 수집
 - 수집된 스레드를 하나의 연속된 글처럼 렌더링
 - Mastodon에 특화되지 않고 ActivityPub 표준을 따르는 모든 서버 지원
@@ -18,27 +20,28 @@ ActivityPub 프로토콜을 활용하여 Mastodon 등의 Fediverse 플랫폼에�
 
 ## 기술 스택
 
-| 구분 | 기술 |
-|------|------|
-| 언어 | TypeScript |
-| 런타임 | Node.js |
-| ActivityPub 클라이언트 | Fedify (`@fedify/fedify`) |
-| 프론트엔드 | React |
-| 메타프레임워크 | TanStack Start |
-| 번들러 | Vite (with Rolldown) |
-| 테스트 | Vitest |
-| 패키지 매니저 | Yarn (nodeLinker: pnpm) |
-| 포매팅 | oxfmt |
-| 린팅 | ESLint + oxlint (병행) |
-| HTML Sanitizer | DOMPurify (Context로 주입) |
-| 다국어(i18n) | Lingui (`@lingui/core`, `@lingui/react`) |
-| 로깅 | LogTape (`@logtape/logtape`) |
+| 구분                   | 기술                                     |
+| ---------------------- | ---------------------------------------- |
+| 언어                   | TypeScript                               |
+| 런타임                 | Node.js                                  |
+| ActivityPub 클라이언트 | Fedify (`@fedify/fedify`)                |
+| 프론트엔드             | React                                    |
+| 메타프레임워크         | TanStack Start                           |
+| 번들러                 | Vite (with Rolldown)                     |
+| 테스트                 | Vitest                                   |
+| 패키지 매니저          | Yarn (nodeLinker: pnpm)                  |
+| 포매팅                 | oxfmt                                    |
+| 린팅                   | ESLint + oxlint (병행)                   |
+| HTML Sanitizer         | DOMPurify (Context로 주입)               |
+| 다국어(i18n)           | Lingui (`@lingui/core`, `@lingui/react`) |
+| 로깅                   | LogTape (`@logtape/logtape`)             |
 
 ---
 
 ## ActivityPub 개념 정리
 
 ### 관련 타입
+
 Fedify에서 제공하는 Activity Vocabulary 타입을 사용합니다:
 
 - **Note**: 짧은 글 (Mastodon의 일반 포스트)
@@ -50,12 +53,12 @@ Fedify에서 제공하는 Activity Vocabulary 타입을 사용합니다:
 ```typescript
 // ActivityPub Object의 주요 속성
 interface ActivityPubObject {
-  id: URL;                    // 포스트의 고유 URI
-  attributedTo: URL | Actor;  // 작성자 (Actor의 URI 또는 객체)
-  content: string;            // HTML 형식의 본문
+  id: URL; // 포스트의 고유 URI
+  attributedTo: URL | Actor; // 작성자 (Actor의 URI 또는 객체)
+  content: string; // HTML 형식의 본문
   published: Temporal.Instant; // 작성 시간
-  inReplyTo?: URL | Object;   // 답글 대상 (부모 포스트)
-  replies?: Collection;       // 답글 컬렉션
+  inReplyTo?: URL | Object; // 답글 대상 (부모 포스트)
+  replies?: Collection; // 답글 컬렉션
 }
 ```
 
@@ -79,10 +82,10 @@ const object = await lookupObject("https://mastodon.social/@user/123456789");
 
 // 타입 체크
 if (object instanceof Note || object instanceof Article) {
-  const content = object.content;           // 본문
-  const authorId = object.attributedToId;   // 작성자 URI
-  const replyToId = object.inReplyToId;     // 답글 대상 URI
-  
+  const content = object.content; // 본문
+  const authorId = object.attributedToId; // 작성자 URI
+  const replyToId = object.inReplyToId; // 답글 대상 URI
+
   // replies 컬렉션 접근 (비동기 dereference)
   const replies = await object.getReplies();
 }
@@ -176,19 +179,19 @@ export type AuthorId = string;
 export interface Post {
   /** 포스트의 고유 URI */
   id: PostId;
-  
+
   /** 작성자의 URI */
   authorId: AuthorId;
-  
+
   /** HTML 형식의 본문 */
   content: string;
-  
+
   /** 작성 시간 (ISO 8601) */
   publishedAt: string;
-  
+
   /** 답글 대상 포스트의 URI (없으면 null) */
   inReplyTo: PostId | null;
-  
+
   /** 원본 URL (사용자가 브라우저에서 볼 수 있는 URL) */
   url: string | null;
 }
@@ -215,7 +218,7 @@ export type RepliesFetchFn = (postId: PostId) => Promise<Post[]>;
 ### 1.2 스레드 수집 로직 (`src/domain/thread.ts`)
 
 ```typescript
-import type { Post, PostId, Thread, PostFetchFn, RepliesFetchFn } from './types';
+import type { Post, PostId, Thread, PostFetchFn, RepliesFetchFn } from "./types";
 
 export interface ThreadCollectorDeps {
   fetchPost: PostFetchFn;
@@ -224,16 +227,16 @@ export interface ThreadCollectorDeps {
 
 /**
  * 주어진 포스트에서 시작하는 가능한 self-reply 스레드들을 수집합니다.
- * 
+ *
  * @param startPostId - 시작 포스트의 ID
  * @param deps - 의존성 (fetchPost, fetchReplies)
  * @returns 가능한 스레드들의 배열 (분기가 있을 경우 여러 개)
- * 
+ *
  * @example
  * // 단일 스레드
  * // A -> B -> C (모두 같은 작성자의 self-reply)
  * // 결과: [[A, B, C]]
- * 
+ *
  * @example
  * // 분기된 스레드
  * // A -> B -> C
@@ -242,7 +245,7 @@ export interface ThreadCollectorDeps {
  */
 export async function getPossibleThreads(
   startPostId: PostId,
-  deps: ThreadCollectorDeps
+  deps: ThreadCollectorDeps,
 ): Promise<Thread[]> {
   // 구현 예정
 }
@@ -253,7 +256,7 @@ export async function getPossibleThreads(
  */
 export async function getLongestThread(
   startPostId: PostId,
-  deps: ThreadCollectorDeps
+  deps: ThreadCollectorDeps,
 ): Promise<Thread> {
   // 구현 예정
 }
@@ -262,77 +265,75 @@ export async function getLongestThread(
  * 답글 목록에서 특정 작성자의 self-reply만 필터링합니다.
  */
 export function filterSelfReplies(replies: Post[], authorId: string): Post[] {
-  return replies.filter(reply => reply.authorId === authorId);
+  return replies.filter((reply) => reply.authorId === authorId);
 }
 ```
 
 ### 1.3 스레드 로직 테스트 (`src/domain/thread.test.ts`)
 
 ```typescript
-import { describe, it, expect, vi } from 'vitest';
-import { getPossibleThreads, getLongestThread, filterSelfReplies } from './thread';
-import type { Post, PostId, ThreadCollectorDeps } from './types';
+import { describe, it, expect, vi } from "vitest";
+import { getPossibleThreads, getLongestThread, filterSelfReplies } from "./thread";
+import type { Post, PostId, ThreadCollectorDeps } from "./types";
 
 // 테스트용 Mock Post 생성 헬퍼
 function createMockPost(overrides: Partial<Post> = {}): Post {
   return {
-    id: 'https://example.com/posts/1',
-    authorId: 'https://example.com/users/alice',
-    content: '<p>Test content</p>',
-    publishedAt: '2024-01-01T00:00:00Z',
+    id: "https://example.com/posts/1",
+    authorId: "https://example.com/users/alice",
+    content: "<p>Test content</p>",
+    publishedAt: "2024-01-01T00:00:00Z",
     inReplyTo: null,
-    url: 'https://example.com/@alice/1',
+    url: "https://example.com/@alice/1",
     ...overrides,
   };
 }
 
-describe('filterSelfReplies', () => {
-  it('작성자가 같은 답글만 반환해야 함', () => {
-    const authorId = 'https://example.com/users/alice';
+describe("filterSelfReplies", () => {
+  it("작성자가 같은 답글만 반환해야 함", () => {
+    const authorId = "https://example.com/users/alice";
     const replies: Post[] = [
-      createMockPost({ id: 'reply1', authorId }),
-      createMockPost({ id: 'reply2', authorId: 'https://example.com/users/bob' }),
-      createMockPost({ id: 'reply3', authorId }),
+      createMockPost({ id: "reply1", authorId }),
+      createMockPost({ id: "reply2", authorId: "https://example.com/users/bob" }),
+      createMockPost({ id: "reply3", authorId }),
     ];
-    
+
     const result = filterSelfReplies(replies, authorId);
-    
+
     expect(result).toHaveLength(2);
-    expect(result.map(r => r.id)).toEqual(['reply1', 'reply3']);
+    expect(result.map((r) => r.id)).toEqual(["reply1", "reply3"]);
   });
-  
-  it('self-reply가 없으면 빈 배열 반환', () => {
-    const replies: Post[] = [
-      createMockPost({ authorId: 'https://example.com/users/bob' }),
-    ];
-    
-    const result = filterSelfReplies(replies, 'https://example.com/users/alice');
-    
+
+  it("self-reply가 없으면 빈 배열 반환", () => {
+    const replies: Post[] = [createMockPost({ authorId: "https://example.com/users/bob" })];
+
+    const result = filterSelfReplies(replies, "https://example.com/users/alice");
+
     expect(result).toHaveLength(0);
   });
 });
 
-describe('getPossibleThreads', () => {
-  it('단일 포스트만 있을 때 길이 1의 스레드 반환', async () => {
+describe("getPossibleThreads", () => {
+  it("단일 포스트만 있을 때 길이 1의 스레드 반환", async () => {
     const post = createMockPost();
     const deps: ThreadCollectorDeps = {
       fetchPost: vi.fn().mockResolvedValue(post),
       fetchReplies: vi.fn().mockResolvedValue([]),
     };
-    
+
     const threads = await getPossibleThreads(post.id, deps);
-    
+
     expect(threads).toHaveLength(1);
     expect(threads[0]).toHaveLength(1);
     expect(threads[0][0]).toEqual(post);
   });
-  
-  it('self-reply 체인을 따라가야 함', async () => {
-    const alice = 'https://example.com/users/alice';
-    const postA = createMockPost({ id: 'A', authorId: alice });
-    const postB = createMockPost({ id: 'B', authorId: alice, inReplyTo: 'A' });
-    const postC = createMockPost({ id: 'C', authorId: alice, inReplyTo: 'B' });
-    
+
+  it("self-reply 체인을 따라가야 함", async () => {
+    const alice = "https://example.com/users/alice";
+    const postA = createMockPost({ id: "A", authorId: alice });
+    const postB = createMockPost({ id: "B", authorId: alice, inReplyTo: "A" });
+    const postC = createMockPost({ id: "C", authorId: alice, inReplyTo: "B" });
+
     const deps: ThreadCollectorDeps = {
       fetchPost: vi.fn().mockImplementation((id: PostId) => {
         const posts: Record<string, Post> = { A: postA, B: postB, C: postC };
@@ -347,37 +348,37 @@ describe('getPossibleThreads', () => {
         return Promise.resolve(replies[id] || []);
       }),
     };
-    
-    const threads = await getPossibleThreads('A', deps);
-    
+
+    const threads = await getPossibleThreads("A", deps);
+
     expect(threads).toHaveLength(1);
     expect(threads[0]).toHaveLength(3);
-    expect(threads[0].map(p => p.id)).toEqual(['A', 'B', 'C']);
+    expect(threads[0].map((p) => p.id)).toEqual(["A", "B", "C"]);
   });
-  
-  it('다른 사용자의 답글은 무시해야 함', async () => {
-    const alice = 'https://example.com/users/alice';
-    const bob = 'https://example.com/users/bob';
-    const postA = createMockPost({ id: 'A', authorId: alice });
-    const postB = createMockPost({ id: 'B', authorId: bob, inReplyTo: 'A' });
-    
+
+  it("다른 사용자의 답글은 무시해야 함", async () => {
+    const alice = "https://example.com/users/alice";
+    const bob = "https://example.com/users/bob";
+    const postA = createMockPost({ id: "A", authorId: alice });
+    const postB = createMockPost({ id: "B", authorId: bob, inReplyTo: "A" });
+
     const deps: ThreadCollectorDeps = {
       fetchPost: vi.fn().mockResolvedValue(postA),
       fetchReplies: vi.fn().mockResolvedValue([postB]),
     };
-    
-    const threads = await getPossibleThreads('A', deps);
-    
+
+    const threads = await getPossibleThreads("A", deps);
+
     expect(threads).toHaveLength(1);
     expect(threads[0]).toHaveLength(1);
   });
-  
-  it('분기가 있을 때 여러 스레드 반환', async () => {
-    const alice = 'https://example.com/users/alice';
-    const postA = createMockPost({ id: 'A', authorId: alice });
-    const postB = createMockPost({ id: 'B', authorId: alice, inReplyTo: 'A' });
-    const postC = createMockPost({ id: 'C', authorId: alice, inReplyTo: 'A' });
-    
+
+  it("분기가 있을 때 여러 스레드 반환", async () => {
+    const alice = "https://example.com/users/alice";
+    const postA = createMockPost({ id: "A", authorId: alice });
+    const postB = createMockPost({ id: "B", authorId: alice, inReplyTo: "A" });
+    const postC = createMockPost({ id: "C", authorId: alice, inReplyTo: "A" });
+
     const deps: ThreadCollectorDeps = {
       fetchPost: vi.fn().mockImplementation((id: PostId) => {
         const posts: Record<string, Post> = { A: postA, B: postB, C: postC };
@@ -385,41 +386,41 @@ describe('getPossibleThreads', () => {
       }),
       fetchReplies: vi.fn().mockImplementation((id: PostId) => {
         const replies: Record<string, Post[]> = {
-          A: [postB, postC],  // 두 개의 self-reply
+          A: [postB, postC], // 두 개의 self-reply
           B: [],
           C: [],
         };
         return Promise.resolve(replies[id] || []);
       }),
     };
-    
-    const threads = await getPossibleThreads('A', deps);
-    
+
+    const threads = await getPossibleThreads("A", deps);
+
     expect(threads).toHaveLength(2);
-    expect(threads[0].map(p => p.id)).toEqual(['A', 'B']);
-    expect(threads[1].map(p => p.id)).toEqual(['A', 'C']);
+    expect(threads[0].map((p) => p.id)).toEqual(["A", "B"]);
+    expect(threads[1].map((p) => p.id)).toEqual(["A", "C"]);
   });
-  
-  it('포스트를 찾을 수 없으면 빈 배열 반환', async () => {
+
+  it("포스트를 찾을 수 없으면 빈 배열 반환", async () => {
     const deps: ThreadCollectorDeps = {
       fetchPost: vi.fn().mockResolvedValue(null),
       fetchReplies: vi.fn().mockResolvedValue([]),
     };
-    
-    const threads = await getPossibleThreads('nonexistent', deps);
-    
+
+    const threads = await getPossibleThreads("nonexistent", deps);
+
     expect(threads).toHaveLength(0);
   });
 });
 
-describe('getLongestThread', () => {
-  it('분기가 있을 때 가장 긴 스레드 반환', async () => {
-    const alice = 'https://example.com/users/alice';
-    const postA = createMockPost({ id: 'A', authorId: alice });
-    const postB = createMockPost({ id: 'B', authorId: alice, inReplyTo: 'A' });
-    const postC = createMockPost({ id: 'C', authorId: alice, inReplyTo: 'B' });
-    const postD = createMockPost({ id: 'D', authorId: alice, inReplyTo: 'A' });
-    
+describe("getLongestThread", () => {
+  it("분기가 있을 때 가장 긴 스레드 반환", async () => {
+    const alice = "https://example.com/users/alice";
+    const postA = createMockPost({ id: "A", authorId: alice });
+    const postB = createMockPost({ id: "B", authorId: alice, inReplyTo: "A" });
+    const postC = createMockPost({ id: "C", authorId: alice, inReplyTo: "B" });
+    const postD = createMockPost({ id: "D", authorId: alice, inReplyTo: "A" });
+
     const deps: ThreadCollectorDeps = {
       fetchPost: vi.fn().mockImplementation((id: PostId) => {
         const posts: Record<string, Post> = { A: postA, B: postB, C: postC, D: postD };
@@ -427,7 +428,7 @@ describe('getLongestThread', () => {
       }),
       fetchReplies: vi.fn().mockImplementation((id: PostId) => {
         const replies: Record<string, Post[]> = {
-          A: [postB, postD],  // 분기: B와 D 모두 self-reply
+          A: [postB, postD], // 분기: B와 D 모두 self-reply
           B: [postC],
           C: [],
           D: [],
@@ -435,12 +436,12 @@ describe('getLongestThread', () => {
         return Promise.resolve(replies[id] || []);
       }),
     };
-    
-    const thread = await getLongestThread('A', deps);
-    
+
+    const thread = await getLongestThread("A", deps);
+
     // A -> B -> C (길이 3) vs A -> D (길이 2)
     expect(thread).toHaveLength(3);
-    expect(thread.map(p => p.id)).toEqual(['A', 'B', 'C']);
+    expect(thread.map((p) => p.id)).toEqual(["A", "B", "C"]);
   });
 });
 ```
@@ -448,7 +449,7 @@ describe('getLongestThread', () => {
 ### 1.4 포맷터 (`src/domain/formatter.ts`)
 
 ```typescript
-import type { Thread, Post } from './types';
+import type { Thread, Post } from "./types";
 
 export interface FormatOptions {
   /** 포스트 사이 구분자 */
@@ -458,7 +459,7 @@ export interface FormatOptions {
 }
 
 const DEFAULT_OPTIONS: FormatOptions = {
-  separator: '\n\n',
+  separator: "\n\n",
   includeMetadata: false,
 };
 
@@ -515,19 +516,39 @@ export interface SanitizerOptions {
  */
 export const DEFAULT_ALLOWED_TAGS = [
   // 텍스트 구조
-  'p', 'br', 'span', 'div',
+  "p",
+  "br",
+  "span",
+  "div",
   // 텍스트 포맷팅
-  'strong', 'b', 'em', 'i', 'u', 's', 'del', 'ins', 'mark', 'code', 'pre',
+  "strong",
+  "b",
+  "em",
+  "i",
+  "u",
+  "s",
+  "del",
+  "ins",
+  "mark",
+  "code",
+  "pre",
   // 링크
-  'a',
+  "a",
   // 목록
-  'ul', 'ol', 'li',
+  "ul",
+  "ol",
+  "li",
   // 인용
-  'blockquote',
+  "blockquote",
   // 미디어
-  'img', 'video', 'audio', 'source',
+  "img",
+  "video",
+  "audio",
+  "source",
   // 기타
-  'sup', 'sub', 'abbr',
+  "sup",
+  "sub",
+  "abbr",
 ] as const;
 
 /**
@@ -535,29 +556,65 @@ export const DEFAULT_ALLOWED_TAGS = [
  */
 export const DEFAULT_ALLOWED_ATTRS = [
   // 링크
-  'href', 'target', 'rel',
+  "href",
+  "target",
+  "rel",
   // 미디어
-  'src', 'alt', 'title', 'width', 'height', 'poster', 'controls', 'type',
+  "src",
+  "alt",
+  "title",
+  "width",
+  "height",
+  "poster",
+  "controls",
+  "type",
   // 일반
-  'class', 'lang', 'dir',
+  "class",
+  "lang",
+  "dir",
   // 접근성
-  'aria-label', 'aria-hidden',
+  "aria-label",
+  "aria-hidden",
 ] as const;
 
 /**
  * 기본 금지 태그 목록
  */
 export const DEFAULT_FORBIDDEN_TAGS = [
-  'script', 'style', 'iframe', 'form', 'input', 'button', 'textarea', 'select',
-  'object', 'embed', 'applet', 'frame', 'frameset', 'meta', 'link', 'base',
+  "script",
+  "style",
+  "iframe",
+  "form",
+  "input",
+  "button",
+  "textarea",
+  "select",
+  "object",
+  "embed",
+  "applet",
+  "frame",
+  "frameset",
+  "meta",
+  "link",
+  "base",
 ] as const;
 
 /**
  * 기본 금지 속성 목록 (이벤트 핸들러 등)
  */
 export const DEFAULT_FORBIDDEN_ATTRS = [
-  'onerror', 'onload', 'onclick', 'onmouseover', 'onmouseout', 'onkeydown',
-  'onkeyup', 'onsubmit', 'onfocus', 'onblur', 'onchange', 'oninput',
+  "onerror",
+  "onload",
+  "onclick",
+  "onmouseover",
+  "onmouseout",
+  "onkeydown",
+  "onkeyup",
+  "onsubmit",
+  "onfocus",
+  "onblur",
+  "onchange",
+  "oninput",
 ] as const;
 
 /**
@@ -593,7 +650,7 @@ export interface SanitizerProviderProps {
  */
 export function SanitizerProvider({ children, sanitizer }: SanitizerProviderProps) {
   const value = React.useMemo(() => ({ sanitizeHtml: sanitizer }), [sanitizer]);
-  
+
   return (
     <SanitizerContext.Provider value={value}>
       {children}
@@ -615,14 +672,14 @@ export { SanitizerContext };
 ### 1.7 DOMPurify 기반 Sanitizer 구현 (`src/infra/domPurifySanitizer.ts`)
 
 ```typescript
-import DOMPurify from 'dompurify';
-import type { SanitizeHtmlFn, SanitizerOptions } from '../domain/sanitizer';
+import DOMPurify from "dompurify";
+import type { SanitizeHtmlFn, SanitizerOptions } from "../domain/sanitizer";
 import {
   DEFAULT_ALLOWED_TAGS,
   DEFAULT_ALLOWED_ATTRS,
   DEFAULT_FORBIDDEN_TAGS,
   DEFAULT_FORBIDDEN_ATTRS,
-} from '../domain/sanitizer';
+} from "../domain/sanitizer";
 
 /**
  * DOMPurify 기반 Sanitizer 생성 함수
@@ -636,7 +693,7 @@ export function createDOMPurifySanitizer(options: SanitizerOptions = {}): Saniti
     FORBID_ATTR: options.forbiddenAttrs ?? [...DEFAULT_FORBIDDEN_ATTRS],
     ALLOW_DATA_ATTR: false,
   };
-  
+
   return (html: string): string => {
     return DOMPurify.sanitize(html, config);
   };
@@ -648,10 +705,10 @@ export function createDOMPurifySanitizer(options: SanitizerOptions = {}): Saniti
  */
 export function createServerSanitizer(options: SanitizerOptions = {}): SanitizeHtmlFn {
   // 동적 import로 서버에서만 JSDOM 로드
-  const { JSDOM } = require('jsdom');
-  const window = new JSDOM('').window;
+  const { JSDOM } = require("jsdom");
+  const window = new JSDOM("").window;
   const purify = DOMPurify(window);
-  
+
   const config: DOMPurify.Config = {
     ALLOWED_TAGS: options.allowedTags ?? [...DEFAULT_ALLOWED_TAGS],
     ALLOWED_ATTR: options.allowedAttrs ?? [...DEFAULT_ALLOWED_ATTRS],
@@ -659,7 +716,7 @@ export function createServerSanitizer(options: SanitizerOptions = {}): SanitizeH
     FORBID_ATTR: options.forbiddenAttrs ?? [...DEFAULT_FORBIDDEN_ATTRS],
     ALLOW_DATA_ATTR: false,
   };
-  
+
   return (html: string): string => {
     return purify.sanitize(html, config);
   };
@@ -669,104 +726,100 @@ export function createServerSanitizer(options: SanitizerOptions = {}): SanitizeH
 ### 1.8 Sanitizer 테스트 (`src/domain/sanitizer.test.ts`)
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { createDOMPurifySanitizer } from '../infra/domPurifySanitizer';
-import {
-  DEFAULT_ALLOWED_TAGS,
-  DEFAULT_ALLOWED_ATTRS,
-  noopSanitizer,
-} from './sanitizer';
+import { describe, it, expect } from "vitest";
+import { createDOMPurifySanitizer } from "../infra/domPurifySanitizer";
+import { DEFAULT_ALLOWED_TAGS, DEFAULT_ALLOWED_ATTRS, noopSanitizer } from "./sanitizer";
 
-describe('noopSanitizer', () => {
-  it('입력을 그대로 반환해야 함', () => {
+describe("noopSanitizer", () => {
+  it("입력을 그대로 반환해야 함", () => {
     const input = '<script>alert("xss")</script>';
     expect(noopSanitizer(input)).toBe(input);
   });
 });
 
-describe('createDOMPurifySanitizer', () => {
+describe("createDOMPurifySanitizer", () => {
   const sanitize = createDOMPurifySanitizer();
-  
-  it('허용된 태그는 유지해야 함', () => {
-    const input = '<p>Hello <strong>World</strong></p>';
-    expect(sanitize(input)).toBe('<p>Hello <strong>World</strong></p>');
+
+  it("허용된 태그는 유지해야 함", () => {
+    const input = "<p>Hello <strong>World</strong></p>";
+    expect(sanitize(input)).toBe("<p>Hello <strong>World</strong></p>");
   });
-  
-  it('script 태그를 제거해야 함', () => {
+
+  it("script 태그를 제거해야 함", () => {
     const input = '<p>Hello</p><script>alert("xss")</script>';
-    expect(sanitize(input)).toBe('<p>Hello</p>');
+    expect(sanitize(input)).toBe("<p>Hello</p>");
   });
-  
-  it('이벤트 핸들러 속성을 제거해야 함', () => {
+
+  it("이벤트 핸들러 속성을 제거해야 함", () => {
     const input = '<img src="x" onerror="alert(1)">';
     const result = sanitize(input);
-    expect(result).not.toContain('onerror');
+    expect(result).not.toContain("onerror");
   });
-  
-  it('href 속성은 유지해야 함', () => {
+
+  it("href 속성은 유지해야 함", () => {
     const input = '<a href="https://example.com">Link</a>';
     expect(sanitize(input)).toContain('href="https://example.com"');
   });
-  
-  it('javascript: URL을 제거해야 함', () => {
+
+  it("javascript: URL을 제거해야 함", () => {
     const input = '<a href="javascript:alert(1)">Click</a>';
     const result = sanitize(input);
-    expect(result).not.toContain('javascript:');
+    expect(result).not.toContain("javascript:");
   });
-  
-  it('style 태그를 제거해야 함', () => {
-    const input = '<style>body { display: none; }</style><p>Text</p>';
-    expect(sanitize(input)).toBe('<p>Text</p>');
+
+  it("style 태그를 제거해야 함", () => {
+    const input = "<style>body { display: none; }</style><p>Text</p>";
+    expect(sanitize(input)).toBe("<p>Text</p>");
   });
-  
-  it('iframe을 제거해야 함', () => {
+
+  it("iframe을 제거해야 함", () => {
     const input = '<iframe src="https://evil.com"></iframe><p>Text</p>';
-    expect(sanitize(input)).toBe('<p>Text</p>');
+    expect(sanitize(input)).toBe("<p>Text</p>");
   });
-  
-  it('data 속성을 제거해야 함', () => {
+
+  it("data 속성을 제거해야 함", () => {
     const input = '<div data-evil="payload">Text</div>';
     const result = sanitize(input);
-    expect(result).not.toContain('data-evil');
+    expect(result).not.toContain("data-evil");
   });
-  
-  it('Mastodon 해시태그 링크를 유지해야 함', () => {
+
+  it("Mastodon 해시태그 링크를 유지해야 함", () => {
     const input = '<a href="https://mastodon.social/tags/test" class="hashtag">#test</a>';
     const result = sanitize(input);
     expect(result).toContain('class="hashtag"');
     expect(result).toContain('href="https://mastodon.social/tags/test"');
   });
-  
-  it('Mastodon 멘션 링크를 유지해야 함', () => {
+
+  it("Mastodon 멘션 링크를 유지해야 함", () => {
     const input = '<a href="https://mastodon.social/@user" class="mention">@user</a>';
     const result = sanitize(input);
     expect(result).toContain('class="mention"');
   });
-  
-  it('이미지 태그를 유지해야 함', () => {
+
+  it("이미지 태그를 유지해야 함", () => {
     const input = '<img src="https://example.com/image.png" alt="Image">';
     const result = sanitize(input);
-    expect(result).toContain('<img');
+    expect(result).toContain("<img");
     expect(result).toContain('src="https://example.com/image.png"');
     expect(result).toContain('alt="Image"');
   });
 });
 
-describe('DEFAULT_ALLOWED_TAGS', () => {
-  it('필수 태그들이 포함되어 있어야 함', () => {
-    expect(DEFAULT_ALLOWED_TAGS).toContain('p');
-    expect(DEFAULT_ALLOWED_TAGS).toContain('a');
-    expect(DEFAULT_ALLOWED_TAGS).toContain('img');
-    expect(DEFAULT_ALLOWED_TAGS).toContain('br');
+describe("DEFAULT_ALLOWED_TAGS", () => {
+  it("필수 태그들이 포함되어 있어야 함", () => {
+    expect(DEFAULT_ALLOWED_TAGS).toContain("p");
+    expect(DEFAULT_ALLOWED_TAGS).toContain("a");
+    expect(DEFAULT_ALLOWED_TAGS).toContain("img");
+    expect(DEFAULT_ALLOWED_TAGS).toContain("br");
   });
 });
 
-describe('DEFAULT_ALLOWED_ATTRS', () => {
-  it('필수 속성들이 포함되어 있어야 함', () => {
-    expect(DEFAULT_ALLOWED_ATTRS).toContain('href');
-    expect(DEFAULT_ALLOWED_ATTRS).toContain('src');
-    expect(DEFAULT_ALLOWED_ATTRS).toContain('alt');
-    expect(DEFAULT_ALLOWED_ATTRS).toContain('class');
+describe("DEFAULT_ALLOWED_ATTRS", () => {
+  it("필수 속성들이 포함되어 있어야 함", () => {
+    expect(DEFAULT_ALLOWED_ATTRS).toContain("href");
+    expect(DEFAULT_ALLOWED_ATTRS).toContain("src");
+    expect(DEFAULT_ALLOWED_ATTRS).toContain("alt");
+    expect(DEFAULT_ALLOWED_ATTRS).toContain("class");
   });
 });
 ```
@@ -774,69 +827,69 @@ describe('DEFAULT_ALLOWED_ATTRS', () => {
 ### 1.7 포맷터 테스트 (`src/domain/formatter.test.ts`)
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { formatThread, formatPost, formatThreadAsHtml } from './formatter';
-import type { Post, Thread } from './types';
+import { describe, it, expect } from "vitest";
+import { formatThread, formatPost, formatThreadAsHtml } from "./formatter";
+import type { Post, Thread } from "./types";
 
 function createMockPost(overrides: Partial<Post> = {}): Post {
   return {
-    id: 'https://example.com/posts/1',
-    authorId: 'https://example.com/users/alice',
-    content: '<p>Test content</p>',
-    publishedAt: '2024-01-01T00:00:00Z',
+    id: "https://example.com/posts/1",
+    authorId: "https://example.com/users/alice",
+    content: "<p>Test content</p>",
+    publishedAt: "2024-01-01T00:00:00Z",
     inReplyTo: null,
-    url: 'https://example.com/@alice/1',
+    url: "https://example.com/@alice/1",
     ...overrides,
   };
 }
 
-describe('formatPost', () => {
-  it('기본 옵션으로 content 반환', () => {
-    const post = createMockPost({ content: '<p>Hello</p>' });
-    expect(formatPost(post)).toBe('<p>Hello</p>');
+describe("formatPost", () => {
+  it("기본 옵션으로 content 반환", () => {
+    const post = createMockPost({ content: "<p>Hello</p>" });
+    expect(formatPost(post)).toBe("<p>Hello</p>");
   });
-  
-  it('includeMetadata 옵션으로 메타데이터 포함', () => {
+
+  it("includeMetadata 옵션으로 메타데이터 포함", () => {
     const post = createMockPost({
-      content: '<p>Hello</p>',
-      publishedAt: '2024-01-01T12:00:00Z',
-      url: 'https://example.com/@alice/1',
+      content: "<p>Hello</p>",
+      publishedAt: "2024-01-01T12:00:00Z",
+      url: "https://example.com/@alice/1",
     });
     const result = formatPost(post, { includeMetadata: true });
-    expect(result).toContain('2024-01-01');
-    expect(result).toContain('https://example.com/@alice/1');
+    expect(result).toContain("2024-01-01");
+    expect(result).toContain("https://example.com/@alice/1");
   });
 });
 
-describe('formatThread', () => {
-  it('단일 포스트 스레드 포맷팅', () => {
-    const thread: Thread = [createMockPost({ content: '<p>Hello</p>' })];
-    expect(formatThread(thread)).toBe('<p>Hello</p>');
+describe("formatThread", () => {
+  it("단일 포스트 스레드 포맷팅", () => {
+    const thread: Thread = [createMockPost({ content: "<p>Hello</p>" })];
+    expect(formatThread(thread)).toBe("<p>Hello</p>");
   });
-  
-  it('여러 포스트를 구분자로 연결', () => {
+
+  it("여러 포스트를 구분자로 연결", () => {
     const thread: Thread = [
-      createMockPost({ content: '<p>First</p>' }),
-      createMockPost({ content: '<p>Second</p>' }),
+      createMockPost({ content: "<p>First</p>" }),
+      createMockPost({ content: "<p>Second</p>" }),
     ];
-    const result = formatThread(thread, { separator: '\n---\n' });
-    expect(result).toBe('<p>First</p>\n---\n<p>Second</p>');
+    const result = formatThread(thread, { separator: "\n---\n" });
+    expect(result).toBe("<p>First</p>\n---\n<p>Second</p>");
   });
-  
-  it('빈 스레드는 빈 문자열 반환', () => {
-    expect(formatThread([])).toBe('');
+
+  it("빈 스레드는 빈 문자열 반환", () => {
+    expect(formatThread([])).toBe("");
   });
 });
 
-describe('formatThreadAsHtml', () => {
-  it('각 포스트를 article 태그로 감싸야 함', () => {
+describe("formatThreadAsHtml", () => {
+  it("각 포스트를 article 태그로 감싸야 함", () => {
     const thread: Thread = [
-      createMockPost({ content: '<p>First</p>' }),
-      createMockPost({ content: '<p>Second</p>' }),
+      createMockPost({ content: "<p>First</p>" }),
+      createMockPost({ content: "<p>Second</p>" }),
     ];
     const result = formatThreadAsHtml(thread);
-    expect(result).toContain('<article');
-    expect(result).toContain('</article>');
+    expect(result).toContain("<article");
+    expect(result).toContain("</article>");
   });
 });
 ```
@@ -853,7 +906,7 @@ LogTape의 계층적 카테고리 시스템을 활용하여 로그를 체계적�
 /**
  * 로그 카테고리 상수 정의
  * LogTape는 문자열 배열로 계층적 카테고리를 표현합니다.
- * 
+ *
  * 카테고리 구조:
  * - ["thread-reader"]: 루트 카테고리
  * - ["thread-reader", "domain"]: 도메인 로직 관련
@@ -862,7 +915,7 @@ LogTape의 계층적 카테고리 시스템을 활용하여 로그를 체계적�
  */
 
 /** 앱 루트 카테고리 */
-export const ROOT_CATEGORY = ['thread-reader'] as const;
+export const ROOT_CATEGORY = ["thread-reader"] as const;
 
 /**
  * 도메인 로직 카테고리
@@ -870,19 +923,19 @@ export const ROOT_CATEGORY = ['thread-reader'] as const;
  * - formatter: 출력 포맷팅
  * - sanitizer: HTML sanitize
  */
-export const DOMAIN_CATEGORY = [...ROOT_CATEGORY, 'domain'] as const;
-export const DOMAIN_THREAD_CATEGORY = [...DOMAIN_CATEGORY, 'thread'] as const;
-export const DOMAIN_FORMATTER_CATEGORY = [...DOMAIN_CATEGORY, 'formatter'] as const;
-export const DOMAIN_SANITIZER_CATEGORY = [...DOMAIN_CATEGORY, 'sanitizer'] as const;
+export const DOMAIN_CATEGORY = [...ROOT_CATEGORY, "domain"] as const;
+export const DOMAIN_THREAD_CATEGORY = [...DOMAIN_CATEGORY, "thread"] as const;
+export const DOMAIN_FORMATTER_CATEGORY = [...DOMAIN_CATEGORY, "formatter"] as const;
+export const DOMAIN_SANITIZER_CATEGORY = [...DOMAIN_CATEGORY, "sanitizer"] as const;
 
 /**
  * 인프라 카테고리
  * - activitypub: ActivityPub/Fedify 관련 요청
  * - http: 일반 HTTP 요청
  */
-export const INFRA_CATEGORY = [...ROOT_CATEGORY, 'infra'] as const;
-export const INFRA_ACTIVITYPUB_CATEGORY = [...INFRA_CATEGORY, 'activitypub'] as const;
-export const INFRA_HTTP_CATEGORY = [...INFRA_CATEGORY, 'http'] as const;
+export const INFRA_CATEGORY = [...ROOT_CATEGORY, "infra"] as const;
+export const INFRA_ACTIVITYPUB_CATEGORY = [...INFRA_CATEGORY, "activitypub"] as const;
+export const INFRA_HTTP_CATEGORY = [...INFRA_CATEGORY, "http"] as const;
 
 /**
  * 웹 서버 카테고리
@@ -890,41 +943,41 @@ export const INFRA_HTTP_CATEGORY = [...INFRA_CATEGORY, 'http'] as const;
  * - ssr: 서버 사이드 렌더링
  * - i18n: 다국어 처리
  */
-export const WEB_CATEGORY = [...ROOT_CATEGORY, 'web'] as const;
-export const WEB_ROUTES_CATEGORY = [...WEB_CATEGORY, 'routes'] as const;
-export const WEB_SSR_CATEGORY = [...WEB_CATEGORY, 'ssr'] as const;
-export const WEB_I18N_CATEGORY = [...WEB_CATEGORY, 'i18n'] as const;
+export const WEB_CATEGORY = [...ROOT_CATEGORY, "web"] as const;
+export const WEB_ROUTES_CATEGORY = [...WEB_CATEGORY, "routes"] as const;
+export const WEB_SSR_CATEGORY = [...WEB_CATEGORY, "ssr"] as const;
+export const WEB_I18N_CATEGORY = [...WEB_CATEGORY, "i18n"] as const;
 
 /**
  * CLI 카테고리
  */
-export const CLI_CATEGORY = [...ROOT_CATEGORY, 'cli'] as const;
+export const CLI_CATEGORY = [...ROOT_CATEGORY, "cli"] as const;
 ```
 
 ### 로그 카테고리 설명
 
-| 카테고리 | 용도 | 예시 로그 |
-|---------|------|----------|
-| `thread-reader` | 앱 전체 루트 | 앱 시작/종료 |
-| `thread-reader.domain.thread` | 스레드 수집 | "스레드 수집 시작", "self-reply 발견" |
-| `thread-reader.domain.formatter` | 포맷팅 | "스레드 포맷팅 완료" |
-| `thread-reader.domain.sanitizer` | HTML sanitize | "위험한 태그 제거됨" |
-| `thread-reader.infra.activitypub` | AP 요청 | "객체 fetch", "replies 컬렉션 조회" |
-| `thread-reader.infra.http` | HTTP 요청 | "요청 시작", "응답 수신" |
-| `thread-reader.web.routes` | 라우트 처리 | "/read 요청 처리" |
-| `thread-reader.web.ssr` | SSR | "서버 렌더링 시작" |
-| `thread-reader.web.i18n` | 다국어 | "로케일 변경: ko" |
-| `thread-reader.cli` | CLI | "CLI 실행", "인자 파싱" |
+| 카테고리                          | 용도          | 예시 로그                             |
+| --------------------------------- | ------------- | ------------------------------------- |
+| `thread-reader`                   | 앱 전체 루트  | 앱 시작/종료                          |
+| `thread-reader.domain.thread`     | 스레드 수집   | "스레드 수집 시작", "self-reply 발견" |
+| `thread-reader.domain.formatter`  | 포맷팅        | "스레드 포맷팅 완료"                  |
+| `thread-reader.domain.sanitizer`  | HTML sanitize | "위험한 태그 제거됨"                  |
+| `thread-reader.infra.activitypub` | AP 요청       | "객체 fetch", "replies 컬렉션 조회"   |
+| `thread-reader.infra.http`        | HTTP 요청     | "요청 시작", "응답 수신"              |
+| `thread-reader.web.routes`        | 라우트 처리   | "/read 요청 처리"                     |
+| `thread-reader.web.ssr`           | SSR           | "서버 렌더링 시작"                    |
+| `thread-reader.web.i18n`          | 다국어        | "로케일 변경: ko"                     |
+| `thread-reader.cli`               | CLI           | "CLI 실행", "인자 파싱"               |
 
 ### 로깅 설정 (`src/logging/setup.ts`)
 
 ```typescript
-import { configure, getConsoleSink, getLogger } from '@logtape/logtape';
-import { ROOT_CATEGORY } from './categories';
+import { configure, getConsoleSink, getLogger } from "@logtape/logtape";
+import { ROOT_CATEGORY } from "./categories";
 
 export interface LoggingConfig {
   /** 최소 로그 레벨 */
-  level: 'trace' | 'debug' | 'info' | 'warning' | 'error' | 'fatal';
+  level: "trace" | "debug" | "info" | "warning" | "error" | "fatal";
   /** 콘솔 출력 여부 */
   console: boolean;
   /** 개발 모드 (더 상세한 로그) */
@@ -932,9 +985,9 @@ export interface LoggingConfig {
 }
 
 const DEFAULT_CONFIG: LoggingConfig = {
-  level: 'info',
+  level: "info",
   console: true,
-  isDev: process.env.NODE_ENV !== 'production',
+  isDev: process.env.NODE_ENV !== "production",
 };
 
 /**
@@ -943,18 +996,18 @@ const DEFAULT_CONFIG: LoggingConfig = {
  */
 export async function setupLogging(config: Partial<LoggingConfig> = {}): Promise<void> {
   const { level, console: useConsole, isDev } = { ...DEFAULT_CONFIG, ...config };
-  
+
   await configure({
     sinks: {
       console: getConsoleSink({
-        formatter: isDev ? 'pretty' : 'json',
+        formatter: isDev ? "pretty" : "json",
       }),
     },
     loggers: [
       {
         category: ROOT_CATEGORY,
-        lowestLevel: isDev ? 'debug' : level,
-        sinks: useConsole ? ['console'] : [],
+        lowestLevel: isDev ? "debug" : level,
+        sinks: useConsole ? ["console"] : [],
       },
     ],
   });
@@ -971,7 +1024,7 @@ export async function teardownLogging(): Promise<void> {
 ### 로거 export (`src/logging/index.ts`)
 
 ```typescript
-import { getLogger } from '@logtape/logtape';
+import { getLogger } from "@logtape/logtape";
 import {
   ROOT_CATEGORY,
   DOMAIN_THREAD_CATEGORY,
@@ -983,10 +1036,10 @@ import {
   WEB_SSR_CATEGORY,
   WEB_I18N_CATEGORY,
   CLI_CATEGORY,
-} from './categories';
+} from "./categories";
 
-export { setupLogging, teardownLogging } from './setup';
-export * from './categories';
+export { setupLogging, teardownLogging } from "./setup";
+export * from "./categories";
 
 // 미리 정의된 로거들
 export const rootLogger = getLogger(ROOT_CATEGORY);
@@ -1005,31 +1058,34 @@ export const cliLogger = getLogger(CLI_CATEGORY);
 
 ```typescript
 // src/domain/thread.ts
-import { threadLogger } from '../logging';
+import { threadLogger } from "../logging";
 
-export async function getPossibleThreads(startPostId: PostId, deps: ThreadCollectorDeps): Promise<Thread[]> {
+export async function getPossibleThreads(
+  startPostId: PostId,
+  deps: ThreadCollectorDeps,
+): Promise<Thread[]> {
   threadLogger.info`스레드 수집 시작: ${startPostId}`;
-  
+
   const post = await deps.fetchPost(startPostId);
   if (!post) {
     threadLogger.warning`포스트를 찾을 수 없음: ${startPostId}`;
     return [];
   }
-  
+
   threadLogger.debug`루트 포스트 로드됨: ${post.id}, 작성자: ${post.authorId}`;
-  
+
   // ... 스레드 수집 로직
-  
+
   threadLogger.info`스레드 수집 완료: ${threads.length}개 스레드 발견`;
   return threads;
 }
 
 // src/infra/activitypub.ts
-import { activityPubLogger } from '../logging';
+import { activityPubLogger } from "../logging";
 
 export const fetchPost: PostFetchFn = async (postId: PostId): Promise<Post | null> => {
   activityPubLogger.debug`ActivityPub 객체 fetch 시작: ${postId}`;
-  
+
   try {
     const obj = await lookupObject(postId);
     activityPubLogger.debug`객체 fetch 성공: ${obj?.constructor.name}`;
@@ -1048,23 +1104,23 @@ export const fetchPost: PostFetchFn = async (postId: PostId): Promise<Post | nul
 ### Lingui 설정 (`lingui.config.ts`)
 
 ```typescript
-import type { LinguiConfig } from '@lingui/conf';
+import type { LinguiConfig } from "@lingui/conf";
 
 const config: LinguiConfig = {
-  locales: ['en', 'ko', 'ja'],
-  sourceLocale: 'en',
+  locales: ["en", "ko", "ja"],
+  sourceLocale: "en",
   fallbackLocales: {
-    default: 'en',
+    default: "en",
   },
   catalogs: [
     {
-      path: '<rootDir>/src/i18n/locales/{locale}/messages',
-      include: ['src'],
-      exclude: ['**/node_modules/**', '**/*.test.ts', '**/*.test.tsx'],
+      path: "<rootDir>/src/i18n/locales/{locale}/messages",
+      include: ["src"],
+      exclude: ["**/node_modules/**", "**/*.test.ts", "**/*.test.tsx"],
     },
   ],
-  format: 'po',
-  compileNamespace: 'ts',
+  format: "po",
+  compileNamespace: "ts",
 };
 
 export default config;
@@ -1073,29 +1129,29 @@ export default config;
 ### i18n 설정 (`src/i18n/setup.ts`)
 
 ```typescript
-import { i18n } from '@lingui/core';
-import { i18nLogger } from '../logging';
+import { i18n } from "@lingui/core";
+import { i18nLogger } from "../logging";
 
 // 지원하는 로케일 목록
-export const SUPPORTED_LOCALES = ['en', 'ko', 'ja'] as const;
-export type SupportedLocale = typeof SUPPORTED_LOCALES[number];
+export const SUPPORTED_LOCALES = ["en", "ko", "ja"] as const;
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 // 로케일 표시 이름
 export const LOCALE_NAMES: Record<SupportedLocale, string> = {
-  en: 'English',
-  ko: '한국어',
-  ja: '日本語',
+  en: "English",
+  ko: "한국어",
+  ja: "日本語",
 };
 
 // 기본 로케일
-export const DEFAULT_LOCALE: SupportedLocale = 'en';
+export const DEFAULT_LOCALE: SupportedLocale = "en";
 
 /**
  * 로케일에 해당하는 메시지 카탈로그를 동적으로 로드합니다.
  */
 export async function loadCatalog(locale: SupportedLocale): Promise<void> {
   i18nLogger.debug`메시지 카탈로그 로드 시작: ${locale}`;
-  
+
   try {
     const { messages } = await import(`./locales/${locale}/messages.ts`);
     i18n.load(locale, messages);
@@ -1114,12 +1170,12 @@ export async function activateLocale(locale: SupportedLocale): Promise<void> {
     i18nLogger.warning`지원하지 않는 로케일: ${locale}, 기본값 사용: ${DEFAULT_LOCALE}`;
     locale = DEFAULT_LOCALE;
   }
-  
+
   // 카탈로그가 로드되지 않았으면 로드
   if (!i18n.messages[locale]) {
     await loadCatalog(locale);
   }
-  
+
   i18n.activate(locale);
   i18nLogger.info`로케일 활성화: ${locale}`;
 }
@@ -1136,18 +1192,18 @@ export async function setupI18n(initialLocale: SupportedLocale = DEFAULT_LOCALE)
  */
 export function detectLocale(acceptLanguage?: string): SupportedLocale {
   if (!acceptLanguage) {
-    if (typeof navigator !== 'undefined') {
+    if (typeof navigator !== "undefined") {
       acceptLanguage = navigator.language;
     }
   }
-  
+
   if (acceptLanguage) {
-    const preferred = acceptLanguage.split(',')[0].split('-')[0].toLowerCase();
+    const preferred = acceptLanguage.split(",")[0].split("-")[0].toLowerCase();
     if (SUPPORTED_LOCALES.includes(preferred as SupportedLocale)) {
       return preferred as SupportedLocale;
     }
   }
-  
+
   return DEFAULT_LOCALE;
 }
 
@@ -1167,36 +1223,32 @@ export {
   LOCALE_NAMES,
   DEFAULT_LOCALE,
   type SupportedLocale,
-} from './setup';
+} from "./setup";
 ```
 
 ### 사용 예시 - 컴포넌트에서
 
 ```tsx
 // src/components/LocaleSwitcher.tsx
-import * as React from 'react';
-import { useLingui } from '@lingui/react';
-import { Trans } from '@lingui/react/macro';
-import { SUPPORTED_LOCALES, LOCALE_NAMES, activateLocale, type SupportedLocale } from '../i18n';
+import * as React from "react";
+import { useLingui } from "@lingui/react";
+import { Trans } from "@lingui/react/macro";
+import { SUPPORTED_LOCALES, LOCALE_NAMES, activateLocale, type SupportedLocale } from "../i18n";
 
 export function LocaleSwitcher() {
   const { i18n } = useLingui();
-  
+
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLocale = e.target.value as SupportedLocale;
     await activateLocale(newLocale);
   };
-  
+
   return (
     <div className="locale-switcher">
       <label htmlFor="locale-select">
         <Trans>Language</Trans>
       </label>
-      <select
-        id="locale-select"
-        value={i18n.locale}
-        onChange={handleChange}
-      >
+      <select id="locale-select" value={i18n.locale} onChange={handleChange}>
         {SUPPORTED_LOCALES.map((locale) => (
           <option key={locale} value={locale}>
             {LOCALE_NAMES[locale]}
@@ -1208,21 +1260,23 @@ export function LocaleSwitcher() {
 }
 
 // src/routes/index.tsx (홈페이지)
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react/macro";
 
 function HomePage() {
   const { t } = useLingui();
-  
+
   return (
     <main className="container">
       <header className="hero">
-        <h1><Trans>Thread Reader</Trans></h1>
+        <h1>
+          <Trans>Thread Reader</Trans>
+        </h1>
         <p className="subtitle">
           <Trans>Read Fediverse threads as a single article</Trans>
         </p>
       </header>
-      
+
       <form onSubmit={handleSubmit} className="search-form">
         <input
           type="url"
@@ -1233,7 +1287,7 @@ function HomePage() {
           <Trans>Read</Trans>
         </button>
       </form>
-      
+
       {error && (
         <p className="error-message">
           <Trans>Please enter a valid URL.</Trans>
@@ -1298,16 +1352,16 @@ msgstr "총 {count}개의 포스트로 구성된 스레드입니다."
 
 ```typescript
 import { lookupObject } from "@fedify/fedify/x/lookup";
-import { 
-  Note, 
-  Article, 
+import {
+  Note,
+  Article,
   Object as APObject,
   Collection,
   OrderedCollection,
   CollectionPage,
   OrderedCollectionPage,
 } from "@fedify/fedify/vocab";
-import type { Post, PostId, PostFetchFn, RepliesFetchFn } from '../domain/types';
+import type { Post, PostId, PostFetchFn, RepliesFetchFn } from "../domain/types";
 
 /**
  * ActivityPub Object를 도메인 Post로 변환합니다.
@@ -1316,18 +1370,18 @@ export function toPost(obj: APObject): Post | null {
   if (!(obj instanceof Note) && !(obj instanceof Article)) {
     return null;
   }
-  
+
   const id = obj.id?.href;
   if (!id) return null;
-  
+
   // attributedTo는 URL이거나 Actor 객체일 수 있음
   const authorId = obj.attributedToId?.href;
   if (!authorId) return null;
-  
+
   return {
     id,
     authorId,
-    content: obj.content?.toString() ?? '',
+    content: obj.content?.toString() ?? "",
     publishedAt: obj.published?.toString() ?? new Date().toISOString(),
     inReplyTo: obj.inReplyToId?.href ?? null,
     url: obj.url?.href ?? null,
@@ -1355,13 +1409,13 @@ export const fetchReplies: RepliesFetchFn = async (postId: PostId): Promise<Post
   try {
     const obj = await lookupObject(postId);
     if (!obj || !(obj instanceof APObject)) return [];
-    
+
     // replies 속성 접근 (비동기 dereference)
     const replies = await obj.getReplies();
     if (!replies) return [];
-    
+
     const posts: Post[] = [];
-    
+
     // Collection 또는 OrderedCollection 처리
     if (replies instanceof Collection || replies instanceof OrderedCollection) {
       // 첫 페이지 가져오기
@@ -1369,14 +1423,14 @@ export const fetchReplies: RepliesFetchFn = async (postId: PostId): Promise<Post
       if (firstPage) {
         await collectPostsFromPage(firstPage, posts);
       }
-      
+
       // items가 직접 포함된 경우
       for await (const item of replies.getItems()) {
         const post = await processItem(item);
         if (post) posts.push(post);
       }
     }
-    
+
     return posts;
   } catch (error) {
     console.error(`Failed to fetch replies for ${postId}:`, error);
@@ -1389,16 +1443,17 @@ export const fetchReplies: RepliesFetchFn = async (postId: PostId): Promise<Post
  */
 async function collectPostsFromPage(
   page: CollectionPage | OrderedCollectionPage,
-  posts: Post[]
+  posts: Post[],
 ): Promise<void> {
   for await (const item of page.getItems()) {
     const post = await processItem(item);
     if (post) posts.push(post);
   }
-  
+
   // 다음 페이지가 있으면 재귀 (제한적으로)
   const nextPage = await page.getNext();
-  if (nextPage && posts.length < 100) { // 최대 100개 제한
+  if (nextPage && posts.length < 100) {
+    // 최대 100개 제한
     await collectPostsFromPage(nextPage, posts);
   }
 }
@@ -1423,7 +1478,7 @@ async function processItem(item: APObject | URL): Promise<Post | null> {
 export function isValidPostUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
   } catch {
     return false;
   }
@@ -1433,62 +1488,62 @@ export function isValidPostUrl(url: string): boolean {
 ### 2.2 ActivityPub 클라이언트 테스트 (`src/infra/activitypub.test.ts`)
 
 ```typescript
-import { describe, it, expect, vi } from 'vitest';
-import { toPost, isValidPostUrl } from './activitypub';
-import { Note, Article } from '@fedify/fedify/vocab';
+import { describe, it, expect, vi } from "vitest";
+import { toPost, isValidPostUrl } from "./activitypub";
+import { Note, Article } from "@fedify/fedify/vocab";
 
-describe('toPost', () => {
-  it('Note를 Post로 변환해야 함', () => {
+describe("toPost", () => {
+  it("Note를 Post로 변환해야 함", () => {
     const note = new Note({
-      id: new URL('https://example.com/posts/1'),
-      attributedTo: new URL('https://example.com/users/alice'),
-      content: '<p>Hello World</p>',
-      published: Temporal.Instant.from('2024-01-01T00:00:00Z'),
+      id: new URL("https://example.com/posts/1"),
+      attributedTo: new URL("https://example.com/users/alice"),
+      content: "<p>Hello World</p>",
+      published: Temporal.Instant.from("2024-01-01T00:00:00Z"),
     });
-    
+
     const post = toPost(note);
-    
+
     expect(post).not.toBeNull();
-    expect(post?.id).toBe('https://example.com/posts/1');
-    expect(post?.authorId).toBe('https://example.com/users/alice');
-    expect(post?.content).toBe('<p>Hello World</p>');
+    expect(post?.id).toBe("https://example.com/posts/1");
+    expect(post?.authorId).toBe("https://example.com/users/alice");
+    expect(post?.content).toBe("<p>Hello World</p>");
   });
-  
-  it('Article을 Post로 변환해야 함', () => {
+
+  it("Article을 Post로 변환해야 함", () => {
     const article = new Article({
-      id: new URL('https://example.com/articles/1'),
-      attributedTo: new URL('https://example.com/users/alice'),
-      content: '<p>Long article content</p>',
+      id: new URL("https://example.com/articles/1"),
+      attributedTo: new URL("https://example.com/users/alice"),
+      content: "<p>Long article content</p>",
     });
-    
+
     const post = toPost(article);
-    
+
     expect(post).not.toBeNull();
-    expect(post?.id).toBe('https://example.com/articles/1');
+    expect(post?.id).toBe("https://example.com/articles/1");
   });
-  
-  it('id가 없으면 null 반환', () => {
+
+  it("id가 없으면 null 반환", () => {
     const note = new Note({
-      attributedTo: new URL('https://example.com/users/alice'),
-      content: '<p>No ID</p>',
+      attributedTo: new URL("https://example.com/users/alice"),
+      content: "<p>No ID</p>",
     });
-    
+
     expect(toPost(note)).toBeNull();
   });
 });
 
-describe('isValidPostUrl', () => {
-  it('HTTPS URL은 유효함', () => {
-    expect(isValidPostUrl('https://mastodon.social/@user/123')).toBe(true);
+describe("isValidPostUrl", () => {
+  it("HTTPS URL은 유효함", () => {
+    expect(isValidPostUrl("https://mastodon.social/@user/123")).toBe(true);
   });
-  
-  it('HTTP URL은 유효함', () => {
-    expect(isValidPostUrl('http://example.com/posts/1')).toBe(true);
+
+  it("HTTP URL은 유효함", () => {
+    expect(isValidPostUrl("http://example.com/posts/1")).toBe(true);
   });
-  
-  it('잘못된 URL은 무효함', () => {
-    expect(isValidPostUrl('not-a-url')).toBe(false);
-    expect(isValidPostUrl('')).toBe(false);
+
+  it("잘못된 URL은 무효함", () => {
+    expect(isValidPostUrl("not-a-url")).toBe(false);
+    expect(isValidPostUrl("")).toBe(false);
   });
 });
 ```
@@ -1500,54 +1555,53 @@ describe('isValidPostUrl', () => {
 ### 3.1 CLI 스크립트 (`src/cli/main.ts`)
 
 ```typescript
-import { fetchPost, fetchReplies, isValidPostUrl } from '../infra/activitypub';
-import { getLongestThread } from '../domain/thread';
-import { formatThread } from '../domain/formatter';
-import type { Thread } from '../domain/types';
+import { fetchPost, fetchReplies, isValidPostUrl } from "../infra/activitypub";
+import { getLongestThread } from "../domain/thread";
+import { formatThread } from "../domain/formatter";
+import type { Thread } from "../domain/types";
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
-    console.error('Usage: npx ts-node src/cli/main.ts <post-url>');
-    console.error('Example: npx ts-node src/cli/main.ts https://mastodon.social/@user/123456');
+    console.error("Usage: npx ts-node src/cli/main.ts <post-url>");
+    console.error("Example: npx ts-node src/cli/main.ts https://mastodon.social/@user/123456");
     process.exit(1);
   }
-  
+
   const postUrl = args[0];
-  
+
   // URL 검증
   if (!isValidPostUrl(postUrl)) {
     console.error(`Error: Invalid URL: ${postUrl}`);
     process.exit(1);
   }
-  
+
   console.error(`Fetching thread starting from: ${postUrl}`);
-  
+
   try {
     // 스레드 수집
     const thread = await getLongestThread(postUrl, {
       fetchPost,
       fetchReplies,
     });
-    
+
     if (thread.length === 0) {
-      console.error('Error: Could not fetch the post or it is not accessible.');
+      console.error("Error: Could not fetch the post or it is not accessible.");
       process.exit(1);
     }
-    
+
     console.error(`Found thread with ${thread.length} post(s)\n`);
-    
+
     // 출력 (stdout으로 결과, stderr로 메타 정보)
     const output = formatThread(thread, {
-      separator: '\n\n---\n\n',
+      separator: "\n\n---\n\n",
       includeMetadata: true,
     });
-    
+
     console.log(output);
-    
   } catch (error) {
-    console.error('Error:', error instanceof Error ? error.message : error);
+    console.error("Error:", error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }
@@ -1587,8 +1641,8 @@ import '../src/cli/main';
 #### `app.config.ts`
 
 ```typescript
-import { defineConfig } from '@tanstack/react-start/config';
-import tsConfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from "@tanstack/react-start/config";
+import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   vite: {
@@ -1600,17 +1654,17 @@ export default defineConfig({
 #### `src/router.tsx`
 
 ```typescript
-import { createRouter as createTanstackRouter } from '@tanstack/react-router';
-import { routeTree } from './routeTree.gen';
+import { createRouter as createTanstackRouter } from "@tanstack/react-router";
+import { routeTree } from "./routeTree.gen";
 
 export function createRouter() {
   return createTanstackRouter({
     routeTree,
-    defaultPreload: 'intent',
+    defaultPreload: "intent",
   });
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
     router: ReturnType<typeof createRouter>;
   }
@@ -1634,12 +1688,9 @@ hydrateRoot(document, <StartClient router={router} />);
 
 ```typescript
 /// <reference types="vinxi/types/server" />
-import {
-  createStartHandler,
-  defaultStreamHandler,
-} from '@tanstack/react-start/server';
-import { getRouterManifest } from '@tanstack/react-start/router-manifest';
-import { createRouter } from './router';
+import { createStartHandler, defaultStreamHandler } from "@tanstack/react-start/server";
+import { getRouterManifest } from "@tanstack/react-start/router-manifest";
+import { createRouter } from "./router";
 
 export default createStartHandler({
   createRouter,
@@ -1650,12 +1701,12 @@ export default createStartHandler({
 ### 4.2 App Providers (`src/context/AppProviders.tsx`)
 
 ```tsx
-import * as React from 'react';
-import { I18nProvider } from '@lingui/react';
-import { i18n } from '../i18n';
-import { SanitizerProvider } from './SanitizerContext';
-import { createDOMPurifySanitizer } from '../infra/domPurifySanitizer';
-import type { SanitizeHtmlFn } from '../domain/sanitizer';
+import * as React from "react";
+import { I18nProvider } from "@lingui/react";
+import { i18n } from "../i18n";
+import { SanitizerProvider } from "./SanitizerContext";
+import { createDOMPurifySanitizer } from "../infra/domPurifySanitizer";
+import type { SanitizeHtmlFn } from "../domain/sanitizer";
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -1674,9 +1725,7 @@ const defaultSanitizer = createDOMPurifySanitizer();
 export function AppProviders({ children, sanitizer = defaultSanitizer }: AppProvidersProps) {
   return (
     <I18nProvider i18n={i18n}>
-      <SanitizerProvider sanitizer={sanitizer}>
-        {children}
-      </SanitizerProvider>
+      <SanitizerProvider sanitizer={sanitizer}>{children}</SanitizerProvider>
     </I18nProvider>
   );
 }
@@ -1687,26 +1736,26 @@ export function AppProviders({ children, sanitizer = defaultSanitizer }: AppProv
 #### `src/routes/__root.tsx`
 
 ```tsx
-import * as React from 'react';
+import * as React from "react";
 import {
   createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
   ScrollRestoration,
-} from '@tanstack/react-router';
-import { AppProviders } from '../context/AppProviders';
-import { setupLogging } from '../logging';
-import { setupI18n, detectLocale } from '../i18n';
-import '../styles/typography.css';
+} from "@tanstack/react-router";
+import { AppProviders } from "../context/AppProviders";
+import { setupLogging } from "../logging";
+import { setupI18n, detectLocale } from "../i18n";
+import "../styles/typography.css";
 
 // 앱 초기화 (서버/클라이언트 모두에서 실행)
 let initialized = false;
 async function initializeApp() {
   if (initialized) return;
   initialized = true;
-  
-  await setupLogging({ isDev: process.env.NODE_ENV !== 'production' });
+
+  await setupLogging({ isDev: process.env.NODE_ENV !== "production" });
   const locale = detectLocale();
   await setupI18n(locale);
 }
@@ -1718,17 +1767,15 @@ export const Route = createRootRoute({
   component: RootComponent,
   head: () => ({
     meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Thread Reader - ActivityPub Thread Viewer' },
-      { 
-        name: 'description', 
-        content: 'Read Mastodon and Fediverse threads as a single, continuous article' 
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Thread Reader - ActivityPub Thread Viewer" },
+      {
+        name: "description",
+        content: "Read Mastodon and Fediverse threads as a single, continuous article",
       },
     ],
-    links: [
-      { rel: 'icon', href: '/favicon.ico' },
-    ],
+    links: [{ rel: "icon", href: "/favicon.ico" }],
   }),
 });
 
@@ -1753,52 +1800,54 @@ function RootComponent() {
 #### `src/routes/index.tsx`
 
 ```tsx
-import * as React from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Trans } from '@lingui/react/macro';
-import { useLingui } from '@lingui/react/macro';
-import { LocaleSwitcher } from '../components/LocaleSwitcher';
+import * as React from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Trans } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react/macro";
+import { LocaleSwitcher } from "../components/LocaleSwitcher";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
 function HomePage() {
   const navigate = useNavigate();
   const { t } = useLingui();
-  const [url, setUrl] = React.useState('');
+  const [url, setUrl] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     if (!url.trim()) {
       setError(t`Please enter a URL.`);
       return;
     }
-    
+
     try {
       new URL(url);
-      navigate({ 
-        to: '/read', 
-        search: { url: url.trim() } 
+      navigate({
+        to: "/read",
+        search: { url: url.trim() },
       });
     } catch {
       setError(t`Please enter a valid URL.`);
     }
   };
-  
+
   return (
     <main className="container">
       <header className="hero">
         <LocaleSwitcher />
-        <h1><Trans>Thread Reader</Trans></h1>
+        <h1>
+          <Trans>Thread Reader</Trans>
+        </h1>
         <p className="subtitle">
           <Trans>Read Fediverse threads as a single article</Trans>
         </p>
       </header>
-      
+
       <form onSubmit={handleSubmit} className="search-form">
         <label htmlFor="post-url" className="visually-hidden">
           <Trans>Post URL</Trans>
@@ -1816,15 +1865,25 @@ function HomePage() {
           <Trans>Read</Trans>
         </button>
       </form>
-      
+
       {error && <p className="error-message">{error}</p>}
-      
+
       <section className="instructions">
-        <h2><Trans>How to use</Trans></h2>
+        <h2>
+          <Trans>How to use</Trans>
+        </h2>
         <ol>
-          <li><Trans>Copy the URL of the first post in a thread from Mastodon or other Fediverse services.</Trans></li>
-          <li><Trans>Paste it in the input field above.</Trans></li>
-          <li><Trans>Click "Read" to view the entire thread as a single article.</Trans></li>
+          <li>
+            <Trans>
+              Copy the URL of the first post in a thread from Mastodon or other Fediverse services.
+            </Trans>
+          </li>
+          <li>
+            <Trans>Paste it in the input field above.</Trans>
+          </li>
+          <li>
+            <Trans>Click "Read" to view the entire thread as a single article.</Trans>
+          </li>
         </ol>
       </section>
     </main>
@@ -1835,52 +1894,52 @@ function HomePage() {
 #### `src/routes/read.tsx`
 
 ```tsx
-import * as React from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import { Trans, Plural } from '@lingui/react/macro';
-import { fetchPost, fetchReplies, isValidPostUrl } from '../infra/activitypub';
-import { getLongestThread } from '../domain/thread';
-import { routesLogger } from '../logging';
-import type { Thread } from '../domain/types';
-import ThreadView from '../components/ThreadView';
+import * as React from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Trans, Plural } from "@lingui/react/macro";
+import { fetchPost, fetchReplies, isValidPostUrl } from "../infra/activitypub";
+import { getLongestThread } from "../domain/thread";
+import { routesLogger } from "../logging";
+import type { Thread } from "../domain/types";
+import ThreadView from "../components/ThreadView";
 
 interface ReadSearchParams {
   url: string;
 }
 
-export const Route = createFileRoute('/read')({
+export const Route = createFileRoute("/read")({
   validateSearch: (search: Record<string, unknown>): ReadSearchParams => {
     return {
-      url: (search.url as string) || '',
+      url: (search.url as string) || "",
     };
   },
   loaderDeps: ({ search: { url } }) => ({ url }),
   loader: async ({ deps: { url } }): Promise<{ thread: Thread; error: string | null }> => {
     routesLogger.info`/read 페이지 로드: ${url}`;
-    
+
     if (!url || !isValidPostUrl(url)) {
       routesLogger.warning`유효하지 않은 URL: ${url}`;
-      return { thread: [], error: 'invalid_url' };
+      return { thread: [], error: "invalid_url" };
     }
-    
+
     try {
       const thread = await getLongestThread(url, {
         fetchPost,
         fetchReplies,
       });
-      
+
       if (thread.length === 0) {
         routesLogger.warning`스레드를 찾을 수 없음: ${url}`;
-        return { thread: [], error: 'not_found' };
+        return { thread: [], error: "not_found" };
       }
-      
+
       routesLogger.info`스레드 로드 완료: ${thread.length}개 포스트`;
       return { thread, error: null };
     } catch (error) {
       routesLogger.error`스레드 로드 실패: ${error}`;
-      return { 
-        thread: [], 
-        error: 'unknown_error'
+      return {
+        thread: [],
+        error: "unknown_error",
       };
     }
   },
@@ -1890,16 +1949,18 @@ export const Route = createFileRoute('/read')({
 function ReadPage() {
   const { url } = Route.useSearch();
   const { thread, error } = Route.useLoaderData();
-  
+
   if (error) {
     return (
       <main className="container">
         <div className="error-container">
-          <h1><Trans>Error</Trans></h1>
+          <h1>
+            <Trans>Error</Trans>
+          </h1>
           <p>
-            {error === 'invalid_url' && <Trans>The URL is not valid.</Trans>}
-            {error === 'not_found' && <Trans>Post not found or inaccessible.</Trans>}
-            {error === 'unknown_error' && <Trans>An unknown error occurred.</Trans>}
+            {error === "invalid_url" && <Trans>The URL is not valid.</Trans>}
+            {error === "not_found" && <Trans>Post not found or inaccessible.</Trans>}
+            {error === "unknown_error" && <Trans>An unknown error occurred.</Trans>}
           </p>
           <a href="/" className="back-link">
             ← <Trans>Back to home</Trans>
@@ -1908,25 +1969,20 @@ function ReadPage() {
       </main>
     );
   }
-  
+
   return (
     <main className="container article-container">
       <nav className="article-nav">
         <a href="/" className="back-link">
           ← <Trans>Read another thread</Trans>
         </a>
-        <a 
-          href={url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="original-link"
-        >
+        <a href={url} target="_blank" rel="noopener noreferrer" className="original-link">
           <Trans>View original</Trans> ↗
         </a>
       </nav>
-      
+
       <ThreadView thread={thread} />
-      
+
       <footer className="article-footer">
         <p className="post-count">
           <Plural
@@ -1946,9 +2002,9 @@ function ReadPage() {
 #### `src/components/ThreadView.tsx`
 
 ```tsx
-import * as React from 'react';
-import type { Thread } from '../domain/types';
-import PostContent from './PostContent';
+import * as React from "react";
+import type { Thread } from "../domain/types";
+import PostContent from "./PostContent";
 
 interface ThreadViewProps {
   thread: Thread;
@@ -1958,13 +2014,13 @@ export default function ThreadView({ thread }: ThreadViewProps) {
   if (thread.length === 0) {
     return <p>표시할 내용이 없습니다.</p>;
   }
-  
+
   return (
     <article className="thread-article">
       {thread.map((post, index) => (
-        <PostContent 
-          key={post.id} 
-          post={post} 
+        <PostContent
+          key={post.id}
+          post={post}
           isFirst={index === 0}
           isLast={index === thread.length - 1}
         />
@@ -1977,10 +2033,10 @@ export default function ThreadView({ thread }: ThreadViewProps) {
 #### `src/components/PostContent.tsx`
 
 ```tsx
-import * as React from 'react';
-import type { Post } from '../domain/types';
-import { useSanitizer } from '../context/SanitizerContext';
-import { useLingui } from '@lingui/react';
+import * as React from "react";
+import type { Post } from "../domain/types";
+import { useSanitizer } from "../context/SanitizerContext";
+import { useLingui } from "@lingui/react";
 
 interface PostContentProps {
   post: Post;
@@ -1991,40 +2047,32 @@ interface PostContentProps {
 export default function PostContent({ post, isFirst, isLast }: PostContentProps) {
   const { i18n } = useLingui();
   const sanitizeHtml = useSanitizer();
-  
+
   const formattedDate = i18n.date(new Date(post.publishedAt), {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
-  
+
   // Context에서 주입받은 sanitizer로 HTML sanitize
   const sanitizedContent = React.useMemo(
     () => sanitizeHtml(post.content),
-    [sanitizeHtml, post.content]
+    [sanitizeHtml, post.content],
   );
-  
+
   return (
-    <section 
-      className={`post-section ${isFirst ? 'post-first' : ''} ${isLast ? 'post-last' : ''}`}
+    <section
+      className={`post-section ${isFirst ? "post-first" : ""} ${isLast ? "post-last" : ""}`}
       data-post-id={post.id}
     >
-      <div 
-        className="post-content"
-        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-      />
-      
+      <div className="post-content" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+
       <footer className="post-meta">
         <time dateTime={post.publishedAt}>{formattedDate}</time>
         {post.url && (
-          <a 
-            href={post.url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="post-link"
-          >
+          <a href={post.url} target="_blank" rel="noopener noreferrer" className="post-link">
             원본
           </a>
         )}
@@ -2043,9 +2091,9 @@ export default function PostContent({ post, isFirst, isLast }: PostContentProps)
 
 :root {
   /* Typography */
-  --font-serif: 'Noto Serif KR', 'Georgia', 'Times New Roman', serif;
-  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
+  --font-serif: "Noto Serif KR", "Georgia", "Times New Roman", serif;
+  --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
   /* Font Sizes (modular scale ~1.25) */
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -2053,13 +2101,13 @@ export default function PostContent({ post, isFirst, isLast }: PostContentProps)
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
   --text-3xl: 1.875rem;
-  
+
   /* Line Heights */
   --leading-tight: 1.25;
   --leading-normal: 1.5;
   --leading-relaxed: 1.75;
   --leading-loose: 2;
-  
+
   /* Colors */
   --color-text: #1a1a1a;
   --color-text-muted: #666;
@@ -2070,7 +2118,7 @@ export default function PostContent({ post, isFirst, isLast }: PostContentProps)
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
   --color-error: #dc2626;
-  
+
   /* Spacing */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -2080,7 +2128,7 @@ export default function PostContent({ post, isFirst, isLast }: PostContentProps)
   --space-8: 2rem;
   --space-12: 3rem;
   --space-16: 4rem;
-  
+
   /* Layout */
   --max-width-prose: 65ch;
   --max-width-content: 42rem;
@@ -2090,7 +2138,9 @@ export default function PostContent({ post, isFirst, isLast }: PostContentProps)
    Reset & Base
    ========================================================================== */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -2402,15 +2452,15 @@ body {
     --text-2xl: 1.25rem;
     --text-3xl: 1.5rem;
   }
-  
+
   .container {
     padding: var(--space-4) var(--space-3);
   }
-  
+
   .hero {
     padding: var(--space-8) 0 var(--space-6);
   }
-  
+
   .post-content {
     text-align: left;
   }
@@ -2427,11 +2477,11 @@ body {
   .post-link {
     display: none;
   }
-  
+
   .post-section {
     page-break-inside: avoid;
   }
-  
+
   body {
     font-size: 12pt;
     line-height: 1.5;
@@ -2515,23 +2565,23 @@ nodeLinker: pnpm
 ### `lingui.config.ts`
 
 ```typescript
-import type { LinguiConfig } from '@lingui/conf';
+import type { LinguiConfig } from "@lingui/conf";
 
 const config: LinguiConfig = {
-  locales: ['en', 'ko', 'ja'],
-  sourceLocale: 'en',
+  locales: ["en", "ko", "ja"],
+  sourceLocale: "en",
   fallbackLocales: {
-    default: 'en',
+    default: "en",
   },
   catalogs: [
     {
-      path: '<rootDir>/src/i18n/locales/{locale}/messages',
-      include: ['src'],
-      exclude: ['**/node_modules/**', '**/*.test.ts', '**/*.test.tsx'],
+      path: "<rootDir>/src/i18n/locales/{locale}/messages",
+      include: ["src"],
+      exclude: ["**/node_modules/**", "**/*.test.ts", "**/*.test.tsx"],
     },
   ],
-  format: 'po',
-  compileNamespace: 'ts',
+  format: "po",
+  compileNamespace: "ts",
 };
 
 export default config;
@@ -2540,29 +2590,29 @@ export default config;
 ### `eslint.config.js`
 
 ```javascript
-import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ['dist/', 'node_modules/', '.vinxi/', '.output/'],
+    ignores: ["dist/", "node_modules/", ".vinxi/", ".output/"],
   },
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ["**/*.{ts,tsx}"],
     rules: {
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   {
-    files: ['**/*.test.{ts,tsx}'],
+    files: ["**/*.test.{ts,tsx}"],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
+      "@typescript-eslint/no-explicit-any": "off",
     },
-  }
+  },
 );
 ```
 
@@ -2578,27 +2628,22 @@ export default tseslint.config(
     "no-var": "error",
     "prefer-const": "error"
   },
-  "ignorePatterns": [
-    "dist/",
-    "node_modules/",
-    ".vinxi/",
-    ".output/"
-  ]
+  "ignorePatterns": ["dist/", "node_modules/", ".vinxi/", ".output/"]
 }
 ```
 
 ### `vite.config.ts`
 
 ```typescript
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import { lingui } from '@lingui/vite-plugin';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { lingui } from "@lingui/vite-plugin";
 
 export default defineConfig({
   plugins: [
     react({
-      plugins: [['@lingui/swc-plugin', {}]],
+      plugins: [["@lingui/swc-plugin", {}]],
     }),
     lingui(),
     tsconfigPaths(),
@@ -2610,7 +2655,7 @@ export default defineConfig({
   //   rolldownBuild: true,
   // },
   build: {
-    target: 'es2022',
+    target: "es2022",
     sourcemap: true,
   },
 });
@@ -2646,21 +2691,21 @@ export default defineConfig({
 ### `vitest.config.ts`
 
 ```typescript
-import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from "vitest/config";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     globals: true,
-    environment: 'jsdom',
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
-    setupFiles: ['./src/test/setup.ts'],
+    environment: "jsdom",
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    setupFiles: ["./src/test/setup.ts"],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html'],
-      include: ['src/**/*.ts', 'src/**/*.tsx'],
-      exclude: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'src/test/**'],
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.ts", "src/**/*.tsx"],
+      exclude: ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**"],
     },
   },
 });
@@ -2670,7 +2715,7 @@ export default defineConfig({
 
 ```typescript
 // Vitest 테스트 설정
-import { afterEach } from 'vitest';
+import { afterEach } from "vitest";
 
 // 각 테스트 후 정리 작업
 afterEach(() => {
@@ -2683,6 +2728,7 @@ afterEach(() => {
 ## 구현 순서 체크리스트
 
 ### Phase 1: 도메인 로직 (TDD)
+
 - [ ] `src/domain/types.ts` - 타입 정의
 - [ ] `src/domain/thread.test.ts` - 스레드 로직 테스트 작성 (실패하는 테스트)
 - [ ] `src/domain/thread.ts` - 스레드 로직 구현 (테스트 통과)
@@ -2692,30 +2738,36 @@ afterEach(() => {
 - [ ] `src/domain/formatter.ts` - 포맷터 구현 (테스트 통과)
 
 ### Phase 1.5: 로깅 시스템
+
 - [ ] `src/logging/categories.ts` - 로그 카테고리 정의
 - [ ] `src/logging/setup.ts` - LogTape 설정
 - [ ] `src/logging/index.ts` - 로거 export
 
 ### Phase 1.6: 다국어 지원
+
 - [ ] `lingui.config.ts` - Lingui 설정
 - [ ] `src/i18n/setup.ts` - i18n 초기화 로직
 - [ ] `src/i18n/locales/en/messages.po` - 영어 번역
 - [ ] `src/i18n/locales/ko/messages.po` - 한국어 번역
 
 ### Phase 2: 인프라 레이어
+
 - [ ] `src/infra/activitypub.ts` - Fedify 기반 ActivityPub 클라이언트
 - [ ] `src/infra/activitypub.test.ts` - 단위 테스트 (mock 사용)
 - [ ] `src/infra/domPurifySanitizer.ts` - DOMPurify 기반 Sanitizer 구현
 
 ### Phase 3: Context & Providers
+
 - [ ] `src/context/SanitizerContext.tsx` - Sanitizer 주입용 Context
 - [ ] `src/context/AppProviders.tsx` - 앱 전체 Provider 조합
 
 ### Phase 4: CLI
+
 - [ ] `src/cli/main.ts` - CLI 진입점
 - [ ] 수동 테스트: 실제 Mastodon 스레드 URL로 테스트
 
 ### Phase 5: 프론트엔드
+
 - [ ] TanStack Start 프로젝트 설정
 - [ ] `src/routes/__root.tsx` - 루트 레이아웃 (I18nProvider, SanitizerProvider 포함)
 - [ ] `src/routes/index.tsx` - 홈페이지
@@ -2726,6 +2778,7 @@ afterEach(() => {
 - [ ] `src/styles/typography.css` - 타이포그래피 스타일
 
 ### Phase 6: 설정 및 마무리
+
 - [ ] `.yarnrc.yml` - Yarn 설정 (nodeLinker: pnpm)
 - [ ] `eslint.config.js` - ESLint 설정
 - [ ] `oxlint.json` - oxlint 설정
@@ -2740,6 +2793,7 @@ afterEach(() => {
 ## 주의사항 및 참고
 
 ### 보안 관련
+
 1. **XSS 방지**: ActivityPub에서 가져온 HTML은 반드시 Context에서 주입받은 `sanitizeHtml`로 필터링해야 합니다. DOMPurify를 사용하여 안전한 태그와 속성만 허용합니다.
 
 2. **허용 태그**: `p`, `br`, `a`, `strong`, `em`, `code`, `pre`, `blockquote`, `ul`, `ol`, `li`, `img` 등 콘텐츠 표시에 필요한 태그만 허용합니다.
@@ -2751,6 +2805,7 @@ afterEach(() => {
 5. **의존성 주입**: Sanitizer는 Context를 통해 주입되므로 테스트 시 mock sanitizer로 쉽게 교체할 수 있습니다.
 
 ### 로깅 관련 (LogTape)
+
 1. **계층적 카테고리**: LogTape는 `["app", "module", "submodule"]` 형태의 계층적 카테고리를 사용합니다. 상위 카테고리 로거 설정이 하위에 상속됩니다.
 
 2. **로그 레벨**: `trace`, `debug`, `info`, `warning`, `error`, `fatal` 6단계를 지원합니다. 개발 환경에서는 `debug`, 프로덕션에서는 `info` 이상을 권장합니다.
@@ -2760,6 +2815,7 @@ afterEach(() => {
 4. **라이브러리 친화적**: LogTape는 라이브러리에서 사용해도 애플리케이션 설정을 방해하지 않습니다. 설정이 없으면 로그가 출력되지 않습니다.
 
 ### 다국어 관련 (Lingui)
+
 1. **메시지 추출**: `yarn i18n:extract` 명령으로 소스 코드에서 번역할 메시지를 추출합니다.
 
 2. **매크로 사용**: `<Trans>` 컴포넌트와 `t` 매크로를 사용하여 JSX 및 문자열을 번역합니다.
@@ -2771,6 +2827,7 @@ afterEach(() => {
 5. **날짜/숫자 포맷**: `i18n.date()`, `i18n.number()` 메서드로 로케일에 맞는 포맷을 사용합니다.
 
 ### ActivityPub 관련
+
 1. **Mastodon의 replies 컬렉션**: 첫 페이지에는 self-replies만 포함됩니다. 다른 서버 구현체는 다를 수 있으므로 항상 `attributedTo`를 확인해야 합니다.
 
 2. **속도 제한**: ActivityPub 서버들은 요청 속도 제한이 있을 수 있습니다. 필요시 요청 간 딜레이를 추가하세요.
@@ -2780,6 +2837,7 @@ afterEach(() => {
 4. **인증된 Fetch**: 일부 서버(secure mode)는 서명된 요청만 허용합니다. Fedify의 authenticated fetch 옵션을 고려하세요.
 
 ### TDD 관련
+
 1. 모든 도메인 로직은 **테스트 먼저** 작성합니다.
 2. 외부 의존성(Fedify, Network, DOMPurify)은 **의존성 주입**으로 분리하여 테스트 가능하게 합니다.
 3. 인프라 레이어 테스트는 **mock**을 사용하되, 통합 테스트도 별도로 진행합니다.
@@ -2787,12 +2845,14 @@ afterEach(() => {
 5. Context 테스트 시 `SanitizerProvider`로 mock sanitizer를 주입합니다.
 
 ### 개발 도구 관련
+
 1. **Yarn + pnpm nodeLinker**: `yarn install` 후 `.pnp.cjs` 대신 `node_modules`가 pnpm 방식으로 생성됩니다. `.yarnrc.yml`에 `yarnPath`는 지정하지 않습니다.
 2. **ESLint + oxlint 병행**: ESLint는 TypeScript 규칙, oxlint는 빠른 기본 린팅을 담당합니다.
 3. **Vite + Rolldown**: Vite 6+에서 실험적으로 Rolldown 번들러를 사용할 수 있습니다. 안정화 전까지는 기본 esbuild/rollup을 사용합니다.
 4. **Lingui + SWC**: `@vitejs/plugin-react-swc`와 `@lingui/swc-plugin`을 함께 사용합니다.
 
 ### 프론트엔드 관련
+
 1. CSS만으로 스타일링 (외부 라이브러리 없음)
 2. 한글 타이포그래피에 신경 쓰기 (word-break, text-align 등)
 3. 접근성 고려 (semantic HTML, ARIA)

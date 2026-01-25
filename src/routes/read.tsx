@@ -79,9 +79,7 @@ function ReadPage() {
         {thread && thread.length > 0 && (
           <>
             <div className="thread-meta">
-              <p>
-                {t`${thread.length} posts in this thread`}
-              </p>
+              <p>{t`${thread.length} posts in this thread`}</p>
               {thread[0].url && (
                 <a
                   href={thread[0].url}
