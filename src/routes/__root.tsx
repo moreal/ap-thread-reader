@@ -11,7 +11,10 @@ export const Route = createRootRoute({
         content: "Read Fediverse threads as a single article",
       },
     ],
-    links: [{ rel: "stylesheet", href: "/styles/typography.css" }],
+    links: [
+      { rel: "stylesheet", href: "/styles/typography.css" },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    ],
   }),
   component: RootComponent,
 });
