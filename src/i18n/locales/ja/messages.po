@@ -13,48 +13,67 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#. placeholder {0}: thread.length
-#: src/routes/read.tsx:83
-msgid "{0} posts in this thread"
-msgstr "このスレッドには{0}件の投稿"
+#. js-lingui-explicit-id
+#: src/components/PostContent.tsx:27
+msgid "Original"
+msgstr "元の投稿"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:33
-#: src/routes/read.tsx:60
+#: src/routes/read.tsx:92
+#~ msgid "View original"
+#~ msgstr "元の投稿を見る"
+
+#: src/routes/read.tsx:83
+#~ msgid "{0} posts in this thread"
+#~ msgstr "このスレッドには{0}件の投稿"
+
+#. js-lingui-explicit-id
+#: src/routes/read.tsx:48
+#: src/routes/read.tsx:102
 msgid "← Back"
 msgstr "← 戻る"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:84
+#: src/routes/index.tsx:115
+msgid "Add &ssr=true to get fully rendered HTML"
+msgstr "完全にレンダリングされたHTMLを取得するには、URLに&ssr=trueを追加してください（例：翻訳アプリ用）。"
+
+#. js-lingui-explicit-id
+#: src/routes/index.tsx:98
 msgid "Copy the URL of the first post in the thread"
 msgstr "スレッドの最初の投稿のURLをコピー"
 
-#: src/routes/index.tsx:64
+#: src/routes/index.tsx:67
 msgid "Enter a Mastodon or Fediverse post URL"
 msgstr "MastodonまたはFediverseの投稿URLを入力"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:81
+#: src/routes/index.tsx:92
 msgid "Find a thread on Mastodon or any Fediverse platform"
 msgstr "MastodonやFediverseでスレッドを見つける"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:77
+#: src/routes/index.tsx:112
+msgid "For external apps"
+msgstr "外部アプリ向け"
+
+#. js-lingui-explicit-id
+#: src/routes/index.tsx:88
 msgid "How to use"
 msgstr "使い方"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:44
+#: src/routes/read.tsx:59
 msgid "Loading thread..."
 msgstr "スレッドを読み込み中..."
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:103
+#: src/routes/read.tsx:125
 msgid "No posts found in thread"
 msgstr "スレッドに投稿が見つかりません"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:87
+#: src/routes/index.tsx:104
 msgid "Paste it above and click \"Read Thread\""
 msgstr "上に貼り付けて「スレッドを読む」をクリック"
 
@@ -72,23 +91,18 @@ msgid "Read Fediverse threads as a single article"
 msgstr "Fediverseのスレッドを一つの記事として読む"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:69
+#: src/routes/index.tsx:74
 msgid "Read Thread"
 msgstr "スレッドを読む"
 
 #. js-lingui-explicit-id
 #: src/routes/index.tsx:49
-#: src/routes/read.tsx:38
-#: src/routes/read.tsx:65
+#: src/routes/read.tsx:51
+#: src/routes/read.tsx:105
 msgid "Thread Reader"
 msgstr "スレッドリーダー"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:74
+#: src/routes/read.tsx:115
 msgid "Try another URL"
 msgstr "別のURLを試す"
-
-#. js-lingui-explicit-id
-#: src/routes/read.tsx:92
-msgid "View original"
-msgstr "元の投稿を見る"

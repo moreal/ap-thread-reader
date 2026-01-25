@@ -107,6 +107,16 @@ function HomePage() {
               />
             </li>
           </ol>
+
+          <h2>
+            <Trans id="For external apps" message="For external apps" />
+          </h2>
+          <p className="instructions-note">
+            <Trans
+              id="Add &ssr=true to get fully rendered HTML"
+              message="Add &ssr=true to the URL to get fully rendered HTML (e.g., for translation apps)."
+            />
+          </p>
         </section>
       </main>
     </div>
