@@ -7,9 +7,9 @@ export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 /** 기본 로케일 */
 export const DEFAULT_LOCALE: SupportedLocale = "en";
 
-// Vite glob import for locale catalogs
+// Vite glob import for locale catalogs (compiled .mjs files)
 const catalogs = import.meta.glob<{ messages: Messages }>(
-  "./locales/*/messages.ts"
+  "./locales/*/messages.mjs"
 );
 
 /**
@@ -19,7 +19,7 @@ export async function loadCatalog(
   locale: SupportedLocale
 ): Promise<Messages | null> {
   try {
-    const path = `./locales/${locale}/messages.ts`;
+    const path = `./locales/${locale}/messages.mjs`;
     const loader = catalogs[path];
     if (!loader) {
       console.warn(`No catalog found for locale: ${locale}`);

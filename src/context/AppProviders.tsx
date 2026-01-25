@@ -16,6 +16,8 @@ import {
   DEFAULT_LOCALE,
   type SupportedLocale,
 } from "@/i18n";
+// SSR을 위해 기본 locale 메시지를 동기적으로 import
+import { messages as enMessages } from "@/i18n/locales/en/messages.mjs";
 
 export interface AppProvidersProps {
   children: ReactNode;
@@ -23,8 +25,8 @@ export interface AppProvidersProps {
 }
 
 // 서버/클라이언트 모두 동일한 기본 locale로 시작
-// Hydration 불일치 방지
-i18n.load(DEFAULT_LOCALE, {});
+// Hydration 불일치 방지 - SSR용 메시지 로드
+i18n.load(DEFAULT_LOCALE, enMessages);
 i18n.activate(DEFAULT_LOCALE);
 
 /**
