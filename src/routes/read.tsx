@@ -39,7 +39,8 @@ function LoadingPage() {
         </h1>
       </header>
       <main className="thread-content">
-        <div className="thread-loading">
+        <div className="thread-loading" role="status" aria-live="polite">
+          <div className="loading-spinner" aria-hidden="true" />
           <p>
             <Trans id="Loading thread..." message="Loading thread..." />
           </p>
