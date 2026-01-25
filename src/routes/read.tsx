@@ -27,16 +27,14 @@ export const Route = createFileRoute("/read")({
 function LoadingPage() {
   return (
     <div className="container">
-      <header className="header">
-        <nav className="nav">
-          <Link to="/" className="back-link">
-            <Trans id="← Back" message="← Back" />
-          </Link>
-          <LocaleSwitcher />
-        </nav>
-        <h1>
+      <header className="header header--compact">
+        <Link to="/" className="back-link">
+          <Trans id="← Back" message="← Back" />
+        </Link>
+        <h1 className="header__title">
           <Trans id="Thread Reader" message="Thread Reader" />
         </h1>
+        <LocaleSwitcher />
       </header>
       <main id="main-content" className="thread-content">
         <div className="thread-loading" role="status" aria-live="polite">
@@ -55,16 +53,14 @@ function ReadPage() {
 
   return (
     <div className="container">
-      <header className="header">
-        <nav className="nav">
-          <Link to="/" className="back-link">
-            <Trans id="← Back" message="← Back" />
-          </Link>
-          <LocaleSwitcher />
-        </nav>
-        <h1>
+      <header className="header header--compact">
+        <Link to="/" className="back-link">
+          <Trans id="← Back" message="← Back" />
+        </Link>
+        <h1 className="header__title">
           <Trans id="Thread Reader" message="Thread Reader" />
         </h1>
+        <LocaleSwitcher />
       </header>
 
       <main id="main-content" className="thread-content">
