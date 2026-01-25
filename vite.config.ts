@@ -4,6 +4,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { lingui } from "@lingui/vite-plugin";
 import { resolve } from "path";
+import { nitro } from "nitro/vite";
 
 export default defineConfig({
   server: {
@@ -21,6 +22,7 @@ export default defineConfig({
       },
     }),
     lingui(),
+    nitro(),
   ],
 
   resolve: {

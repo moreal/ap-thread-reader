@@ -12,4 +12,4 @@ COPY . .
 RUN yarn build
 
 EXPOSE 3000
-CMD ["node", "dist/server/server-entry.js"]
+CMD ["node", ".output/server/index.mjs"]
