@@ -116,8 +116,10 @@ body {
   font-weight: 500;
 }
 
-.back-link:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .back-link:hover {
+    text-decoration: underline;
+  }
 }
 
 /* URL Form */
@@ -165,11 +167,19 @@ body {
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
 }
 
-.submit-button:hover {
-  background-color: var(--color-primary-dark);
+.submit-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) {
+  .submit-button:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+  }
 }
 
 .submit-button:focus-visible {
@@ -252,8 +262,10 @@ body {
   font-size: 0.875rem;
 }
 
-.original-link:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .original-link:hover {
+    text-decoration: underline;
+  }
 }
 
 .thread-empty {
@@ -364,8 +376,10 @@ body {
   text-decoration: none;
 }
 
-.post-link:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .post-link:hover {
+    text-decoration: underline;
+  }
 }
 
 /* Locale Switcher */
@@ -446,5 +460,23 @@ body {
     flex-direction: column;
     gap: var(--spacing-sm);
     text-align: center;
+  }
+}
+
+/* Touch Targets */
+@media (pointer: coarse) {
+  .back-link,
+  .original-link,
+  .post-link,
+  .retry-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-sm);
+  }
+
+  .locale-select {
+    min-height: 44px;
+    padding: var(--spacing-sm) var(--spacing-md);
   }
 }
