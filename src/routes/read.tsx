@@ -38,7 +38,7 @@ function LoadingPage() {
           <Trans id="Thread Reader" message="Thread Reader" />
         </h1>
       </header>
-      <main className="thread-content">
+      <main id="main-content" className="thread-content">
         <div className="thread-loading" role="status" aria-live="polite">
           <div className="loading-spinner" aria-hidden="true" />
           <p>
@@ -67,7 +67,7 @@ function ReadPage() {
         </h1>
       </header>
 
-      <main className="thread-content">
+      <main id="main-content" className="thread-content">
         {error && (
           <div className="error-container">
             <p className="error-message">{error}</p>

@@ -23,6 +23,9 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <AppProviders>
           <Outlet />
         </AppProviders>

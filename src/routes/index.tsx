@@ -57,7 +57,7 @@ function HomePage() {
         <LocaleSwitcher />
       </header>
 
-      <main className="home-content">
+      <main id="main-content" className="home-content">
         <form onSubmit={handleSubmit} className="url-form">
           <div className="input-group">
             <input

@@ -386,6 +386,24 @@ body {
   border: 0;
 }
 
+/* Skip Link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  z-index: 1000;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: var(--spacing-md);
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .container {
