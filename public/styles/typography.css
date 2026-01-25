@@ -140,7 +140,7 @@ body {
     box-shadow 0.2s;
 }
 
-.url-input:focus {
+.url-input:focus-visible {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
@@ -162,7 +162,7 @@ body {
   background-color: var(--color-primary-dark);
 }
 
-.submit-button:focus {
+.submit-button:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgb(79 70 229 / 0.3);
 }
@@ -342,7 +342,7 @@ body {
   cursor: pointer;
 }
 
-.locale-select:focus {
+.locale-select:focus-visible {
   outline: none;
   border-color: var(--color-primary);
 }
