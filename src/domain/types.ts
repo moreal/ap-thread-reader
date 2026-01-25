@@ -9,6 +9,20 @@ export type PostId = string;
 export type AuthorId = string;
 
 /**
+ * 작성자 정보
+ */
+export interface Author {
+  /** 작성자의 고유 URI */
+  id: AuthorId;
+
+  /** 표시 이름 */
+  name: string;
+
+  /** 프로필 URL (브라우저에서 볼 수 있는 URL) */
+  url: string | null;
+}
+
+/**
  * 도메인 Post 객체
  * ActivityPub의 Note/Article을 추상화한 내부 표현
  */
@@ -18,6 +32,9 @@ export interface Post {
 
   /** 작성자의 URI */
   authorId: AuthorId;
+
+  /** 작성자 정보 */
+  author: Author | null;
 
   /** HTML 형식의 본문 */
   content: string;

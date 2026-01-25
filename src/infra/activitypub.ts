@@ -1,12 +1,12 @@
 import { lookupObject, Article, Note, isActor } from "@fedify/fedify";
 import type { Object as APObject } from "@fedify/fedify";
-import type { Post, PostId, PostFetchFn, RepliesFetchFn } from "@/domain/types";
+import type { Post, PostId, PostFetchFn, RepliesFetchFn, Author } from "@/domain/types";
 import { activitypubLogger } from "@/logging";
 
 /**
  * Fedify Object를 도메인 Post로 변환합니다.
  */
-export function toPost(obj: APObject): Post | null {
+export async function toPost(obj: APObject): Promise<Post | null> {
   if (!(obj instanceof Note) && !(obj instanceof Article)) {
     activitypubLogger.warn`Object is not a Note or Article: ${obj.constructor.name}`;
     return null;
@@ -25,6 +25,22 @@ export function toPost(obj: APObject): Post | null {
     return null;
   }
 
+  // Fetch author information
+  let author: Author | null = null;
+  try {
+    const actor = await obj.getAttribution();
+    if (actor && isActor(actor)) {
+      const actorUrl = actor.url;
+      author = {
+        id: authorId,
+        name: actor.name?.toString() ?? actor.preferredUsername?.toString() ?? authorId,
+        url: actorUrl instanceof URL ? actorUrl.href : typeof actorUrl === "string" ? actorUrl : null,
+      };
+    }
+  } catch (error) {
+    activitypubLogger.debug`Failed to fetch author for ${id}: ${error}`;
+  }
+
   const content = obj.content?.toString() ?? "";
   const published = obj.published;
   const publishedAt = published?.toString() ?? new Date().toISOString();
@@ -35,6 +51,7 @@ export function toPost(obj: APObject): Post | null {
   return {
     id,
     authorId,
+    author,
     content,
     publishedAt,
     inReplyTo,
@@ -60,7 +77,7 @@ export async function fetchPost(postId: PostId): Promise<Post | null> {
       return null;
     }
 
-    const post = toPost(obj as APObject);
+    const post = await toPost(obj as APObject);
     if (post) {
       activitypubLogger.debug`Successfully fetched post: ${postId}`;
     }
@@ -152,7 +169,7 @@ export async function fetchReplies(postId: PostId): Promise<Post[]> {
         activitypubLogger.debug`Reply item ${itemCount}: ${item?.constructor.name ?? "null"}, id: ${item?.id?.href ?? "no id"}`;
 
         if (item instanceof Note || item instanceof Article) {
-          const post = toPost(item);
+          const post = await toPost(item);
           if (post) {
             posts.push(post);
             activitypubLogger.debug`Converted reply to post: ${post.id}`;
@@ -173,7 +190,7 @@ export async function fetchReplies(postId: PostId): Promise<Post[]> {
           activitypubLogger.debug`Reply item ${itemCount}: ${item?.constructor.name ?? "null"}, id: ${item?.id?.href ?? "no id"}`;
 
           if (item instanceof Note || item instanceof Article) {
-            const post = toPost(item);
+            const post = await toPost(item);
             if (post) {
               posts.push(post);
               activitypubLogger.debug`Converted reply to post: ${post.id}`;
