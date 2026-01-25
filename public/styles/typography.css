@@ -147,6 +147,15 @@ body {
   box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
 }
 
+.url-input--error {
+  border-color: var(--color-error);
+}
+
+.url-input--error:focus-visible {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgb(220 38 38 / 0.1);
+}
+
 .submit-button {
   padding: var(--spacing-sm) var(--spacing-lg);
   background-color: var(--color-primary);
@@ -166,6 +175,11 @@ body {
 .submit-button:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgb(79 70 229 / 0.3);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Error Messages */

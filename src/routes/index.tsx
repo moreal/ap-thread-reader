@@ -61,18 +61,26 @@ function HomePage() {
         <form onSubmit={handleSubmit} className="url-form">
           <div className="input-group">
             <input
-              type="text"
+              type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder={t`Enter a Mastodon or Fediverse post URL`}
-              className="url-input"
+              className={`url-input${error ? " url-input--error" : ""}`}
               aria-label="Post URL"
+              aria-invalid={error ? "true" : undefined}
+              aria-describedby={error ? "url-error" : undefined}
             />
             <button type="submit" className="submit-button">
               <Trans id="Read Thread" message="Read Thread" />
             </button>
           </div>
-          {error && <p className="error-message">{error}</p>}
+          <div aria-live="polite">
+            {error && (
+              <p className="error-message" role="alert" id="url-error">
+                {error}
+              </p>
+            )}
+          </div>
         </form>
 
         <section className="instructions">
