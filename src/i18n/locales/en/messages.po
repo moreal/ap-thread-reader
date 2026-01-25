@@ -14,7 +14,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/components/PostContent.tsx:27
+#: src/components/ThreadView.tsx:53
 msgid "Original"
 msgstr "Original"
 
@@ -28,81 +28,81 @@ msgstr "Original"
 #~ msgstr "{0} posts in this thread"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:48
-#: src/routes/read.tsx:102
+#: src/routes/read.tsx:52
+#: src/routes/read.tsx:110
 msgid "← Back"
 msgstr "← Back"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:115
+#: src/routes/index.tsx:120
 msgid "Add &ssr=true to get fully rendered HTML"
 msgstr "Add &ssr=true to the URL to get fully rendered HTML (e.g., for translation apps)."
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:98
+#: src/routes/index.tsx:103
 msgid "Copy the URL of the first post in the thread"
 msgstr "Copy the URL of the first post in the thread"
 
-#: src/routes/index.tsx:67
+#: src/routes/index.tsx:72
 msgid "Enter a Mastodon or Fediverse post URL"
 msgstr "Enter a Mastodon or Fediverse post URL"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:92
+#: src/routes/index.tsx:97
 msgid "Find a thread on Mastodon or any Fediverse platform"
 msgstr "Find a thread on Mastodon or any Fediverse platform"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:112
+#: src/routes/index.tsx:117
 msgid "For external apps"
 msgstr "For external apps"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:88
+#: src/routes/index.tsx:93
 msgid "How to use"
 msgstr "How to use"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:59
+#: src/routes/read.tsx:64
 msgid "Loading thread..."
 msgstr "Loading thread..."
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:125
+#: src/routes/read.tsx:134
 msgid "No posts found in thread"
 msgstr "No posts found in thread"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:104
+#: src/routes/index.tsx:109
 msgid "Paste it above and click \"Read Thread\""
 msgstr "Paste it above and click \"Read Thread\""
 
-#: src/routes/index.tsx:30
+#: src/routes/index.tsx:34
 msgid "Please enter a URL"
 msgstr "Please enter a URL"
 
-#: src/routes/index.tsx:35
+#: src/routes/index.tsx:39
 msgid "Please enter a valid HTTP or HTTPS URL"
 msgstr "Please enter a valid HTTP or HTTPS URL"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:52
+#: src/routes/index.tsx:57
 msgid "Read Fediverse threads as a single article"
 msgstr "Read Fediverse threads as a single article"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:74
+#: src/routes/index.tsx:79
 msgid "Read Thread"
 msgstr "Read Thread"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:49
-#: src/routes/read.tsx:51
-#: src/routes/read.tsx:105
+#: src/routes/index.tsx:54
+#: src/routes/read.tsx:56
+#: src/routes/read.tsx:114
 msgid "Thread Reader"
 msgstr "Thread Reader"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:115
+#: src/routes/read.tsx:124
 msgid "Try another URL"
 msgstr "Try another URL"

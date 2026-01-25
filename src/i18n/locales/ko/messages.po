@@ -14,7 +14,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/components/PostContent.tsx:27
+#: src/components/ThreadView.tsx:53
 msgid "Original"
 msgstr "원본"
 
@@ -28,81 +28,81 @@ msgstr "원본"
 #~ msgstr "이 스레드에 {0}개의 포스트"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:48
-#: src/routes/read.tsx:102
+#: src/routes/read.tsx:52
+#: src/routes/read.tsx:110
 msgid "← Back"
 msgstr "← 뒤로"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:115
+#: src/routes/index.tsx:120
 msgid "Add &ssr=true to get fully rendered HTML"
 msgstr "완전히 렌더링된 HTML을 받으려면 URL에 &ssr=true를 추가하세요 (예: 번역 앱용)."
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:98
+#: src/routes/index.tsx:103
 msgid "Copy the URL of the first post in the thread"
 msgstr "스레드의 첫 번째 포스트 URL을 복사하세요"
 
-#: src/routes/index.tsx:67
+#: src/routes/index.tsx:72
 msgid "Enter a Mastodon or Fediverse post URL"
 msgstr "Mastodon 또는 Fediverse 포스트 URL을 입력하세요"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:92
+#: src/routes/index.tsx:97
 msgid "Find a thread on Mastodon or any Fediverse platform"
 msgstr "Mastodon 또는 Fediverse 플랫폼에서 스레드를 찾으세요"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:112
+#: src/routes/index.tsx:117
 msgid "For external apps"
 msgstr "외부 앱용"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:88
+#: src/routes/index.tsx:93
 msgid "How to use"
 msgstr "사용 방법"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:59
+#: src/routes/read.tsx:64
 msgid "Loading thread..."
 msgstr "스레드를 불러오는 중..."
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:125
+#: src/routes/read.tsx:134
 msgid "No posts found in thread"
 msgstr "스레드에서 포스트를 찾을 수 없습니다"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:104
+#: src/routes/index.tsx:109
 msgid "Paste it above and click \"Read Thread\""
 msgstr "위에 붙여넣고 \"스레드 읽기\"를 클릭하세요"
 
-#: src/routes/index.tsx:30
+#: src/routes/index.tsx:34
 msgid "Please enter a URL"
 msgstr "URL을 입력해주세요"
 
-#: src/routes/index.tsx:35
+#: src/routes/index.tsx:39
 msgid "Please enter a valid HTTP or HTTPS URL"
 msgstr "올바른 HTTP 또는 HTTPS URL을 입력해주세요"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:52
+#: src/routes/index.tsx:57
 msgid "Read Fediverse threads as a single article"
 msgstr "페디버스 스레드를 하나의 글처럼 읽기"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:74
+#: src/routes/index.tsx:79
 msgid "Read Thread"
 msgstr "스레드 읽기"
 
 #. js-lingui-explicit-id
-#: src/routes/index.tsx:49
-#: src/routes/read.tsx:51
-#: src/routes/read.tsx:105
+#: src/routes/index.tsx:54
+#: src/routes/read.tsx:56
+#: src/routes/read.tsx:114
 msgid "Thread Reader"
 msgstr "스레드 리더"
 
 #. js-lingui-explicit-id
-#: src/routes/read.tsx:115
+#: src/routes/read.tsx:124
 msgid "Try another URL"
 msgstr "다른 URL 시도"

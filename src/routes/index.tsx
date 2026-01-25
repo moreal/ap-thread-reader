@@ -1,8 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, type HistoryState } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Trans } from "@lingui/react";
 import { t } from "@lingui/macro";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+
+interface NavigationState extends HistoryState {
+  fromIndex?: boolean;
+}
 
 function isValidUrl(url: string): boolean {
   try {
@@ -39,6 +43,7 @@ function HomePage() {
     navigate({
       to: "/read",
       search: { url },
+      state: { fromIndex: true } as NavigationState,
     });
   };
 

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { Trans } from "@lingui/react";
 import { useEffect, useState } from "react";
 import { ThreadView } from "@/components/ThreadView";
@@ -41,12 +41,17 @@ export const Route = createFileRoute("/read")({
 });
 
 function LoadingPage() {
+  const location = useLocation();
+  const fromIndex = (location.state as { fromIndex?: boolean })?.fromIndex;
+
   return (
     <div className="container">
       <header className="header header--compact">
-        <Link to="/" className="back-link">
-          <Trans id="← Back" message="← Back" />
-        </Link>
+        {fromIndex && (
+          <Link to="/" className="back-link">
+            <Trans id="← Back" message="← Back" />
+          </Link>
+        )}
         <h1 className="header__title">
           <Trans id="Thread Reader" message="Thread Reader" />
         </h1>
@@ -66,6 +71,8 @@ function LoadingPage() {
 
 function ReadPage() {
   const loaderData = Route.useLoaderData();
+  const location = useLocation();
+  const fromIndex = (location.state as { fromIndex?: boolean })?.fromIndex;
   const [data, setData] = useState<ThreadResult>({
     thread: loaderData.thread,
     error: loaderData.error,
@@ -98,9 +105,11 @@ function ReadPage() {
   return (
     <div className="container">
       <header className="header header--compact">
-        <Link to="/" className="back-link">
-          <Trans id="← Back" message="← Back" />
-        </Link>
+        {fromIndex && (
+          <Link to="/" className="back-link">
+            <Trans id="← Back" message="← Back" />
+          </Link>
+        )}
         <h1 className="header__title">
           <Trans id="Thread Reader" message="Thread Reader" />
         </h1>
