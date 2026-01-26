@@ -2,6 +2,7 @@ import { getLongestThread } from "@/domain/thread";
 import { formatThread } from "@/domain/formatter";
 import { fetchPost, fetchReplies, isValidPostUrl } from "@/infra/activitypub";
 import { setupLogging, cliLogger } from "@/logging";
+import { createPostIdFromString } from "@/domain/types";
 
 export interface CliOptions {
   /** 메타데이터 출력 여부 */
@@ -33,7 +34,7 @@ export async function main(args: string[], options: CliOptions = {}): Promise<nu
   cliLogger.debug`Fetching thread from: ${url}`;
 
   try {
-    const thread = await getLongestThread(url, {
+    const thread = await getLongestThread(createPostIdFromString(url), {
       fetchPost,
       fetchReplies,
     });

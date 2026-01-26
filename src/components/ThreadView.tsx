@@ -1,8 +1,8 @@
-import type { Thread } from "@/domain/types";
+import type { SerializableThread } from "@/domain/types";
 import { PostContent } from "./PostContent";
 
 export interface ThreadViewProps {
-  thread: Thread;
+  thread: SerializableThread;
 }
 
 /**
@@ -22,8 +22,8 @@ export function ThreadView({ thread }: ThreadViewProps) {
   return (
     <article className="thread">
       <header className="thread-meta">
-        {firstPost.author && (
-          firstPost.author.url ? (
+        {firstPost.author &&
+          (firstPost.author.url ? (
             <a
               href={firstPost.author.url}
               target="_blank"
@@ -34,8 +34,7 @@ export function ThreadView({ thread }: ThreadViewProps) {
             </a>
           ) : (
             <span className="author-name">{firstPost.author.name}</span>
-          )
-        )}
+          ))}
         <span className="meta-separator">·</span>
         {firstPost.url ? (
           <a

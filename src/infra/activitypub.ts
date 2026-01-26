@@ -1,6 +1,7 @@
 import { lookupObject, Article, Note, isActor } from "@fedify/fedify";
 import type { Object as APObject } from "@fedify/fedify";
 import type { Post, PostId, PostFetchFn, RepliesFetchFn, Author } from "@/domain/types";
+import { createPostId } from "@/domain/types";
 import { activitypubLogger } from "@/logging";
 
 /**
@@ -12,11 +13,11 @@ export async function toPost(obj: APObject): Promise<Post | null> {
     return null;
   }
 
-  const id = obj.id?.href;
-  if (!id) {
+  if (!obj.id) {
     activitypubLogger.warn`Object has no id`;
     return null;
   }
+  const id = createPostId(obj.id);
 
   const attributedTo = obj.attributionId;
   const authorId = attributedTo?.href;
@@ -34,7 +35,8 @@ export async function toPost(obj: APObject): Promise<Post | null> {
       author = {
         id: authorId,
         name: actor.name?.toString() ?? actor.preferredUsername?.toString() ?? authorId,
-        url: actorUrl instanceof URL ? actorUrl.href : typeof actorUrl === "string" ? actorUrl : null,
+        url:
+          actorUrl instanceof URL ? actorUrl.href : typeof actorUrl === "string" ? actorUrl : null,
       };
     }
   } catch (error) {
@@ -44,7 +46,7 @@ export async function toPost(obj: APObject): Promise<Post | null> {
   const content = obj.content?.toString() ?? "";
   const published = obj.published;
   const publishedAt = published?.toString() ?? new Date().toISOString();
-  const inReplyTo = obj.replyTargetId?.href ?? null;
+  const inReplyTo = obj.replyTargetId ? createPostId(obj.replyTargetId) : null;
   const objUrl = obj.url;
   const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
 

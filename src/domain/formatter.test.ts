@@ -1,16 +1,28 @@
 import { describe, it, expect } from "vitest";
 import { formatPost, formatThread, formatThreadAsHtml } from "./formatter";
 import type { Post, Thread } from "./types";
+import { createPostIdFromString } from "./types";
 
-function createMockPost(overrides: Partial<Post> = {}): Post {
+// 테스트용 Mock Post 오버라이드 타입
+interface MockPostOverrides {
+  id?: string;
+  authorId?: string;
+  author?: { id: string; name: string; url: string | null } | null;
+  content?: string;
+  publishedAt?: string;
+  inReplyTo?: string | null;
+  url?: string | null;
+}
+
+function createMockPost(overrides: MockPostOverrides = {}): Post {
   return {
-    id: "https://example.com/posts/1",
-    authorId: "https://example.com/users/alice",
-    content: "<p>Test content</p>",
-    publishedAt: "2024-01-01T00:00:00Z",
-    inReplyTo: null,
-    url: "https://example.com/@alice/1",
-    ...overrides,
+    id: createPostIdFromString(overrides.id ?? "https://example.com/posts/1"),
+    authorId: overrides.authorId ?? "https://example.com/users/alice",
+    author: overrides.author ?? null,
+    content: overrides.content ?? "<p>Test content</p>",
+    publishedAt: overrides.publishedAt ?? "2024-01-01T00:00:00Z",
+    inReplyTo: overrides.inReplyTo ? createPostIdFromString(overrides.inReplyTo) : null,
+    url: overrides.url ?? "https://example.com/@alice/1",
   };
 }
 
@@ -85,8 +97,8 @@ describe("formatThread", () => {
 describe("formatThreadAsHtml", () => {
   it("스레드를 HTML 구조로 포맷팅해야 함", () => {
     const thread: Thread = [
-      createMockPost({ id: "post1", content: "<p>First</p>" }),
-      createMockPost({ id: "post2", content: "<p>Second</p>" }),
+      createMockPost({ id: "https://example.com/post1", content: "<p>First</p>" }),
+      createMockPost({ id: "https://example.com/post2", content: "<p>Second</p>" }),
     ];
 
     const result = formatThreadAsHtml(thread);

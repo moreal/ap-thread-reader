@@ -1,8 +1,8 @@
-import type { Post } from "@/domain/types";
+import type { SerializablePost } from "@/domain/types";
 import { useSanitizer } from "@/hooks/useSanitizer";
 
 export interface PostContentProps {
-  post: Post;
+  post: SerializablePost;
   index: number;
 }
 

@@ -416,12 +416,24 @@ body {
   animation: fadeIn 0.4s ease-out backwards;
 }
 
-.post:nth-child(1) { animation-delay: 0ms; }
-.post:nth-child(2) { animation-delay: 50ms; }
-.post:nth-child(3) { animation-delay: 100ms; }
-.post:nth-child(4) { animation-delay: 150ms; }
-.post:nth-child(5) { animation-delay: 200ms; }
-.post:nth-child(n+6) { animation-delay: 250ms; }
+.post:nth-child(1) {
+  animation-delay: 0ms;
+}
+.post:nth-child(2) {
+  animation-delay: 50ms;
+}
+.post:nth-child(3) {
+  animation-delay: 100ms;
+}
+.post:nth-child(4) {
+  animation-delay: 150ms;
+}
+.post:nth-child(5) {
+  animation-delay: 200ms;
+}
+.post:nth-child(n + 6) {
+  animation-delay: 250ms;
+}
 
 .post:last-child {
   border-bottom: none;

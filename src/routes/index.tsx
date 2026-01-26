@@ -1,4 +1,8 @@
-import { createFileRoute, useNavigate, type HistoryState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  type HistoryState,
+} from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { Trans } from "@lingui/react";
 import { t } from "@lingui/macro";
