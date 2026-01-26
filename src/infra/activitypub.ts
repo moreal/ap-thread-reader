@@ -1,8 +1,39 @@
-import { lookupObject, Article, Note, isActor, Link } from "@fedify/fedify";
-import type { Object as APObject } from "@fedify/fedify";
+import {
+  lookupObject,
+  Article,
+  Note,
+  isActor,
+  Link,
+  getDocumentLoader,
+  kvCache,
+  MemoryKvStore,
+} from "@fedify/fedify";
+import { Temporal } from "@js-temporal/polyfill";
+import type { Object as APObject, DocumentLoader } from "@fedify/fedify";
 import type { Post, PostId, PostFetchFn, RepliesFetchFn, Author } from "@/domain/types";
 import { createPostId } from "@/domain/types";
 import { activitypubLogger } from "@/logging";
+
+// 캐시된 DocumentLoader 설정
+const kv = new MemoryKvStore();
+const cachedDocumentLoader: DocumentLoader = kvCache({
+  loader: getDocumentLoader(),
+  kv,
+  rules: [
+    // JSON-LD 컨텍스트는 오래 캐싱 (30일)
+    [new URLPattern("https://www.w3.org/*"), Temporal.Duration.from({ days: 30 })],
+    [new URLPattern("https://w3id.org/*"), Temporal.Duration.from({ days: 30 })],
+    // ActivityStreams 컨텍스트
+    [new URLPattern("https://www.w3.org/ns/activitystreams"), Temporal.Duration.from({ days: 30 })],
+    // 일반 ActivityPub 객체는 짧게 캐싱 (5분)
+    [new URLPattern("*://*/*"), Temporal.Duration.from({ minutes: 5 })],
+  ],
+});
+
+const lookupOptions = {
+  documentLoader: cachedDocumentLoader,
+  contextLoader: cachedDocumentLoader,
+};
 
 /**
  * Fedify Object를 도메인 Post로 변환합니다.
@@ -68,7 +99,7 @@ export async function fetchPost(postId: PostId): Promise<Post | null> {
   activitypubLogger.debug`Fetching post: ${postId}`;
 
   try {
-    const obj = await lookupObject(postId);
+    const obj = await lookupObject(postId, lookupOptions);
     if (!obj) {
       activitypubLogger.warn`Post not found: ${postId}`;
       return null;
@@ -121,7 +152,7 @@ async function* iterateCollectionPages(
 
     activitypubLogger.debug`Fetching next page: ${nextUrl}`;
     try {
-      const nextObj = await lookupObject(nextUrl);
+      const nextObj = await lookupObject(nextUrl, lookupOptions);
       if (!nextObj || !("getItems" in nextObj)) {
         break;
       }
@@ -140,7 +171,7 @@ export async function fetchReplies(postId: PostId): Promise<Post[]> {
   activitypubLogger.debug`Fetching replies for: ${postId}`;
 
   try {
-    const obj = await lookupObject(postId);
+    const obj = await lookupObject(postId, lookupOptions);
     if (!obj) {
       activitypubLogger.warn`Post not found when fetching replies: ${postId}`;
       return [];

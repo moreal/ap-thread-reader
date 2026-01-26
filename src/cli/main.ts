@@ -17,10 +17,7 @@ export interface CliOptions {
 /**
  * CLI 메인 함수
  */
-export async function main(
-  args: string[],
-  options: CliOptions = {},
-): Promise<number> {
+export async function main(args: string[], options: CliOptions = {}): Promise<number> {
   await setupLogging({ level: options.verbose ? "debug" : "info" });
 
   const url = args[0];
