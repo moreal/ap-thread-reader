@@ -8,5 +8,5 @@ export default {
     },
   ],
   format: "po",
-  compileNamespace: "es",
+  compileNamespace: "ts",
 };

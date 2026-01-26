@@ -8,14 +8,14 @@ export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const DEFAULT_LOCALE: SupportedLocale = "en";
 
 // Vite glob import for locale catalogs (compiled .mjs files)
-const catalogs = import.meta.glob<{ messages: Messages }>("./locales/*/messages.mjs");
+const catalogs = import.meta.glob<{ messages: Messages }>("./locales/*/messages.po");
 
 /**
  * 로케일의 메시지 카탈로그를 동적으로 로드합니다.
  */
 export async function loadCatalog(locale: SupportedLocale): Promise<Messages | null> {
   try {
-    const path = `./locales/${locale}/messages.mjs`;
+    const path = `./locales/${locale}/messages.po`;
     const loader = catalogs[path];
     if (!loader) {
       console.warn(`No catalog found for locale: ${locale}`);

@@ -41,3 +41,4 @@ yarn-error.log*
 app.config.*.js
 .wrangler
 **/*.mjs
+src/i18n/locales/**/messages.ts
