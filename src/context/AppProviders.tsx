@@ -17,7 +17,7 @@ import {
   type SupportedLocale,
 } from "@/i18n";
 // SSR을 위해 기본 locale 메시지를 동기적으로 import
-import { messages as enMessages } from "@/i18n/locales/en/messages.ts";
+import { messages as enMessages } from "@/i18n/locales/en/messages";
 
 export interface AppProvidersProps {
   children: ReactNode;
