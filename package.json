@@ -23,6 +23,7 @@
   "dependencies": {
     "@fedify/fedify": "^1.3.0",
     "@lingui/core": "^5.0.0",
+    "@lingui/macro": "^5.9.0",
     "@lingui/react": "^5.0.0",
     "@logtape/logtape": "^0.8.0",
     "@optique/core": "^0.9.1",

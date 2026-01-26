@@ -1246,6 +1246,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lingui/macro@npm:^5.9.0":
+  version: 5.9.0
+  resolution: "@lingui/macro@npm:5.9.0"
+  dependencies:
+    "@lingui/core": "npm:5.9.0"
+    "@lingui/react": "npm:5.9.0"
+  peerDependencies:
+    "@lingui/babel-plugin-lingui-macro": 5.9.0
+    babel-plugin-macros: 2 || 3
+  peerDependenciesMeta:
+    "@lingui/babel-plugin-lingui-macro":
+      optional: true
+    babel-plugin-macros:
+      optional: true
+  checksum: 10c0/c06e5cbfe3d61288a64ee2bee9ce641ac2d400b741a19501a310757cf68de0a4cffc016ab84a49c32a19982496ba6733c9fee36bfe4e0d1f8b52c27fcd5d3127
+  languageName: node
+  linkType: hard
+
 "@lingui/message-utils@npm:5.9.0":
   version: 5.9.0
   resolution: "@lingui/message-utils@npm:5.9.0"
@@ -1256,7 +1274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lingui/react@npm:^5.0.0":
+"@lingui/react@npm:5.9.0, @lingui/react@npm:^5.0.0":
   version: 5.9.0
   resolution: "@lingui/react@npm:5.9.0"
   dependencies:
@@ -2843,6 +2861,7 @@ __metadata:
     "@lingui/babel-plugin-lingui-macro": "npm:^5.9.0"
     "@lingui/cli": "npm:^5.0.0"
     "@lingui/core": "npm:^5.0.0"
+    "@lingui/macro": "npm:^5.9.0"
     "@lingui/react": "npm:^5.0.0"
     "@lingui/vite-plugin": "npm:^5.0.0"
     "@logtape/logtape": "npm:^0.8.0"
