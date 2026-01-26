@@ -1451,6 +1451,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@optique/core@npm:0.9.1, @optique/core@npm:^0.9.1":
+  version: 0.9.1
+  resolution: "@optique/core@npm:0.9.1"
+  checksum: 10c0/23c970cb75e198e421e2fb2e889e40aeb3cd7a841befb332a14d80396c983d50d08f21dc6e7425b2600a23b011db3338830c50243f01004df16e2275f0aaae87
+  languageName: node
+  linkType: hard
+
+"@optique/run@npm:^0.9.1":
+  version: 0.9.1
+  resolution: "@optique/run@npm:0.9.1"
+  dependencies:
+    "@optique/core": "npm:0.9.1"
+  checksum: 10c0/92143d60bd59a5b98cfdb9c26987f37c68185df1668fe960de47d3d7dbe8147579a5c5c0d7c7ba8805b046cfde42c9a5a30c87aefda6548e8971fdcb6a9a7452
+  languageName: node
+  linkType: hard
+
 "@oxc-minify/binding-android-arm-eabi@npm:0.110.0":
   version: 0.110.0
   resolution: "@oxc-minify/binding-android-arm-eabi@npm:0.110.0"
@@ -2830,6 +2846,8 @@ __metadata:
     "@lingui/react": "npm:^5.0.0"
     "@lingui/vite-plugin": "npm:^5.0.0"
     "@logtape/logtape": "npm:^0.8.0"
+    "@optique/core": "npm:^0.9.1"
+    "@optique/run": "npm:^0.9.1"
     "@tanstack/react-router": "npm:^1.92.0"
     "@tanstack/react-start": "npm:^1.157.0"
     "@types/babel-plugin-macros": "npm:^3"

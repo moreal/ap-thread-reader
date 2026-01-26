@@ -25,6 +25,8 @@
     "@lingui/core": "^5.0.0",
     "@lingui/react": "^5.0.0",
     "@logtape/logtape": "^0.8.0",
+    "@optique/core": "^0.9.1",
+    "@optique/run": "^0.9.1",
     "@tanstack/react-router": "^1.92.0",
     "@tanstack/react-start": "^1.157.0",
     "dompurify": "^3.2.0",
