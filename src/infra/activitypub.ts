@@ -1,4 +1,4 @@
-import { lookupObject, Article, Note, isActor } from "@fedify/fedify";
+import { lookupObject, Article, Note, isActor, Link } from "@fedify/fedify";
 import type { Object as APObject } from "@fedify/fedify";
 import type { Post, PostId, PostFetchFn, RepliesFetchFn, Author } from "@/domain/types";
 import { createPostId } from "@/domain/types";
@@ -103,7 +103,7 @@ async function* iterateCollectionPages(
     // Get items from current page
     try {
       for await (const item of currentPage.getItems()) {
-        if (item) {
+        if (item && !(item instanceof Link)) {
           yield item;
         }
       }
