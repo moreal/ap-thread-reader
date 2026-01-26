@@ -315,13 +315,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@digitalbazaar/http-client@npm:^4.2.0":
+"@digitalbazaar/http-client@npm:4.3.0":
   version: 4.3.0
   resolution: "@digitalbazaar/http-client@npm:4.3.0"
   dependencies:
     ky: "npm:^1.14.2"
     undici: "npm:^6.23.0"
   checksum: 10c0/97bcba6774a80b8f5a311ab1465ac94934ae01c2a985fd7d68af0d033cf1623ec4912a28bd98ffbae52e82f238291ebfff2f5ecd33d4cda9f1e0b660e9040bb5
+  languageName: node
+  linkType: hard
+
+"@digitalbazaar/http-client@patch:@digitalbazaar/http-client@npm%3A4.3.0#~/.yarn/patches/@digitalbazaar-http-client-npm-4.3.0-79754e4402.patch":
+  version: 4.3.0
+  resolution: "@digitalbazaar/http-client@patch:@digitalbazaar/http-client@npm%3A4.3.0#~/.yarn/patches/@digitalbazaar-http-client-npm-4.3.0-79754e4402.patch::version=4.3.0&hash=7025bf"
+  dependencies:
+    ky: "npm:^1.14.2"
+    undici: "npm:^6.23.0"
+  checksum: 10c0/3462423a36f65bbc3ab706925029cb7cae5fbd356c1638b34d8c1cda2f9a06725a25fdfccebbdbcddcaf40663f48456c3e4cc91b8bdae6067149cc5153f81bbd
   languageName: node
   linkType: hard
 
@@ -2889,6 +2899,7 @@ __metadata:
     tsx: "npm:^4.19.0"
     typescript: "npm:^5.7.0"
     typescript-eslint: "npm:^8.18.0"
+    undici: "npm:^7.19.1"
     vite: "npm:^7.0.0"
     vite-tsconfig-paths: "npm:^6.0.5"
     vitest: "npm:^2.1.0"
@@ -6665,7 +6676,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^7.18.2, undici@npm:^7.19.0":
+"undici@npm:^7.18.2, undici@npm:^7.19.0, undici@npm:^7.19.1":
   version: 7.19.1
   resolution: "undici@npm:7.19.1"
   checksum: 10c0/3807f9968dfbbdb45da8e6d68279f2831ff9a173e01f116eb3d43aa07fb03474aae307aba0d167a55ad686ec21733d357776c73639a26ecaaf877cbd6b904e79

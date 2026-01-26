@@ -36,6 +36,11 @@ export async function setupLogging(options?: {
         sinks: [],
         lowestLevel: "warning",
       },
+      {
+        category: ["fedify"],
+        sinks: silent ? [] : ["console"],
+        lowestLevel: level,
+      },
     ],
   });
 

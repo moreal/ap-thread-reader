@@ -93,8 +93,10 @@ export type PostFetchFn = (postId: PostId) => Promise<Post | null>;
 
 /**
  * 포스트의 답글 목록을 fetch하는 함수의 타입
+ * @param postId - 답글을 가져올 포스트의 ID
+ * @param authorFilter - 특정 작성자의 답글만 필터링 (optional)
  */
-export type RepliesFetchFn = (postId: PostId) => Promise<Post[]>;
+export type RepliesFetchFn = (postId: PostId, authorFilter?: string) => Promise<Post[]>;
 
 /**
  * 스레드 수집기 의존성

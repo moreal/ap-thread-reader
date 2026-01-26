@@ -40,7 +40,9 @@ export async function getPossibleThreads(
   const threads: Thread[] = [];
 
   async function collectThreads(currentPost: Post, currentThread: Thread): Promise<void> {
-    const replies = await deps.fetchReplies(currentPost.id);
+    // authorId를 전달하여 fetchReplies 단계에서 미리 필터링 (toPost 변환 전 최적화)
+    const replies = await deps.fetchReplies(currentPost.id, authorId);
+    // fetchReplies에서 이미 필터링되었지만, 안전하게 이중 체크
     const selfReplies = filterSelfReplies(replies, authorId);
 
     if (selfReplies.length === 0) {
