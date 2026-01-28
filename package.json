@@ -61,8 +61,5 @@
     "vite-tsconfig-paths": "^6.0.5",
     "vitest": "^2.1.0"
   },
-  "resolutions": {
-    "@digitalbazaar/http-client@npm:^4.2.0": "patch:@digitalbazaar/http-client@npm%3A4.3.0#~/.yarn/patches/@digitalbazaar-http-client-npm-4.3.0-79754e4402.patch"
-  },
   "packageManager": "yarn@4.12.0"
 }
