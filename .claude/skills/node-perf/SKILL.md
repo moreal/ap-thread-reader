@@ -2,7 +2,7 @@
 name: node-perf
 description: Node.js 성능 프로파일링 및 분석. --prof 플래그로 CPU 프로파일을 생성하고 병목 지점을 찾아 최적화를 제안합니다.
 argument-hint: [URL]
-allowed-tools: Bash(timeout 120 yarn node --prof --import tsx scripts/cli.ts *), Bash(node --prof-process *), Bash(ls -t isolate-*.log *), Bash(rm isolate-*.log), Read, Glob, Task
+allowed-tools: Bash(yarn rolldown *), Bash(time yarn node --prof *), Bash(node --prof-process *), Bash(ls -t isolate-*.log *), Bash(rm isolate-*.log), Read, Glob, Task
 ---
 
 # Node.js Performance Profiling Skill
@@ -11,15 +11,27 @@ allowed-tools: Bash(timeout 120 yarn node --prof --import tsx scripts/cli.ts *),
 
 ## 실행 단계
 
-### Step 1: 프로파일 데이터 생성
+### Step 0: 사전 빌드
 
-프로파일링을 실행합니다:
+tsx 런타임 트랜스파일링 오버헤드를 제거하기 위해 rolldown으로 사전 빌드합니다:
 
 ```bash
-timeout 120 yarn node --prof --import tsx scripts/cli.ts $0
+yarn rolldown --dir dist --platform node scripts/cli.ts
 ```
 
-- `timeout 120`: 무한 대기 방지 (2분 제한)
+- `--dir dist`: 출력 디렉토리
+- `--platform node`: Node.js 환경 타겟
+- 빌드 결과물은 `dist/cli.js`에 생성됩니다.
+
+### Step 1: 프로파일 데이터 생성
+
+사전 빌드된 JS 파일로 프로파일링을 실행합니다:
+
+```bash
+time yarn node --prof dist/cli.js $0
+```
+
+- `time`: 전체 실행 시간 측정
 - `--prof`: V8 프로파일링 활성화
 - `$0`: 사용자가 제공한 URL 인자
 
