@@ -1,3 +1,4 @@
+import { LookupObjectOptions } from "@fedify/fedify";
 import type { Post, PostId, Thread, ThreadCollectorDeps } from "./types";
 
 export type { ThreadCollectorDeps };
@@ -29,9 +30,10 @@ export function filterSelfReplies(replies: Post[], authorId: string): Post[] {
  */
 export async function getPossibleThreads(
   startPostId: PostId,
+  options: LookupObjectOptions,
   deps: ThreadCollectorDeps,
 ): Promise<Thread[]> {
-  const startPost = await deps.fetchPost(startPostId);
+  const startPost = await deps.fetchPost(startPostId, {});
   if (!startPost) {
     return [];
   }
@@ -39,24 +41,49 @@ export async function getPossibleThreads(
   const authorId = startPost.authorId;
   const threads: Thread[] = [];
 
-  async function collectThreads(currentPost: Post, currentThread: Thread): Promise<void> {
-    // authorId를 전달하여 fetchReplies 단계에서 미리 필터링 (toPost 변환 전 최적화)
-    const replies = await deps.fetchReplies(currentPost.id, authorId);
-    // fetchReplies에서 이미 필터링되었지만, 안전하게 이중 체크
-    const selfReplies = filterSelfReplies(replies, authorId);
-
-    if (selfReplies.length === 0) {
-      // 더 이상 self-reply가 없으면 현재 스레드를 결과에 추가
-      threads.push(currentThread);
-    } else {
-      // 각 self-reply에 대해 재귀적으로 스레드 수집
-      for (const reply of selfReplies) {
-        await collectThreads(reply, [...currentThread, reply]);
-      }
-    }
+  // 큐 기반 파이프라이닝: 다음 레벨 fetch를 즉시 시작
+  interface QueueItem {
+    post: Post;
+    thread: Thread;
+    repliesPromise: Promise<Post[]>;
   }
 
-  await collectThreads(startPost, [startPost]);
+  // 초기 큐: startPost의 replies를 즉시 fetch 시작
+  let queue: QueueItem[] = [
+    {
+      post: startPost,
+      thread: [startPost],
+      repliesPromise: deps.fetchReplies(startPost, options, authorId),
+    },
+  ];
+
+  while (queue.length > 0) {
+    const currentBatch = queue.splice(0);
+    const nextQueue: QueueItem[] = [];
+
+    await Promise.all(
+      currentBatch.map(async (item) => {
+        const replies = await item.repliesPromise;
+        const selfReplies = filterSelfReplies(replies, authorId);
+
+        if (selfReplies.length === 0) {
+          threads.push(item.thread);
+        } else {
+          for (const reply of selfReplies) {
+            // 다음 레벨 fetch를 즉시 시작 (파이프라이닝)
+            nextQueue.push({
+              post: reply,
+              thread: [...item.thread, reply],
+              repliesPromise: deps.fetchReplies(reply, options, authorId),
+            });
+          }
+        }
+      }),
+    );
+
+    queue = nextQueue;
+  }
+
   return threads;
 }
 
@@ -66,9 +93,10 @@ export async function getPossibleThreads(
  */
 export async function getLongestThread(
   startPostId: PostId,
+  options: LookupObjectOptions,
   deps: ThreadCollectorDeps,
 ): Promise<Thread> {
-  const threads = await getPossibleThreads(startPostId, deps);
+  const threads = await getPossibleThreads(startPostId, options, deps);
 
   if (threads.length === 0) {
     return [];

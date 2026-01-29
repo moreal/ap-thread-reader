@@ -58,6 +58,7 @@ node --prof-process <isolate-file> > /path/to/scratchpad/profile-result.txt
 **반드시 Task 도구를 사용하여 subagent에게 분석을 위임합니다.**
 
 Task 도구 호출 시:
+
 - `subagent_type`: "general-purpose"
 - 프로파일 결과 파일 경로를 전달
 - 다음 분석 항목을 요청:

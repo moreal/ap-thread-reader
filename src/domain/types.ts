@@ -1,3 +1,5 @@
+import { Article, LookupObjectOptions, Note } from "@fedify/fedify";
+
 /**
  * 포스트의 고유 식별자 (ActivityPub URI)
  * Branded URL 타입으로 일반 URL과 구분됨
@@ -76,6 +78,9 @@ export interface Post {
 
   /** 원본 URL (사용자가 브라우저에서 볼 수 있는 URL) */
   url: string | null;
+
+  /** 원본 ActivityPub 객체 참조 (내부 최적화용, lookupObject 재호출 방지) */
+  _apObjectRef?: Note | Article;
 }
 
 /**
@@ -89,14 +94,18 @@ export type Thread = Post[];
  * 포스트를 fetch하는 함수의 타입
  * 의존성 주입을 위해 사용
  */
-export type PostFetchFn = (postId: PostId) => Promise<Post | null>;
+export type PostFetchFn = (postId: PostId, options: LookupObjectOptions) => Promise<Post | null>;
 
 /**
  * 포스트의 답글 목록을 fetch하는 함수의 타입
- * @param postId - 답글을 가져올 포스트의 ID
+ * @param post - 답글을 가져올 포스트 객체
  * @param authorFilter - 특정 작성자의 답글만 필터링 (optional)
  */
-export type RepliesFetchFn = (postId: PostId, authorFilter?: string) => Promise<Post[]>;
+export type RepliesFetchFn = (
+  post: Post,
+  options: LookupObjectOptions,
+  authorFilter?: string,
+) => Promise<Post[]>;
 
 /**
  * 스레드 수집기 의존성

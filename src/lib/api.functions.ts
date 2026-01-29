@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getLongestThread } from "@/domain/thread";
-import { fetchPost, fetchReplies, isValidPostUrl } from "@/infra/activitypub";
+import {
+  commonLookupObjectOptions,
+  fetchPost,
+  isValidPostUrl,
+  repliesFetcher,
+} from "@/infra/activitypub";
 import type { SerializableThread } from "@/domain/types";
 import { createPostIdFromString, toSerializableThread } from "@/domain/types";
 
@@ -17,10 +22,14 @@ export const fetchThreadData = createServerFn({ method: "GET" })
     }
 
     try {
-      const thread = await getLongestThread(createPostIdFromString(url), {
-        fetchPost,
-        fetchReplies,
-      });
+      const thread = await getLongestThread(
+        createPostIdFromString(url),
+        commonLookupObjectOptions,
+        {
+          fetchPost,
+          fetchReplies: repliesFetcher,
+        },
+      );
 
       if (thread.length === 0) {
         return { thread: null, error: "No posts found in thread" };

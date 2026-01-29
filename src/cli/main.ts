@@ -1,6 +1,6 @@
 import { getLongestThread } from "@/domain/thread";
 import { formatThread } from "@/domain/formatter";
-import { fetchPost, fetchReplies } from "@/infra/activitypub";
+import { commonLookupObjectOptions, fetchPost, repliesFetcher } from "@/infra/activitypub";
 import { setupLogging, cliLogger } from "@/logging";
 import { createPostIdFromString } from "@/domain/types";
 import { object, option, optional, argument } from "@optique/core/parser";
@@ -31,9 +31,9 @@ export async function main(args: string[], options: CliOptions = {}): Promise<nu
   cliLogger.debug(`Fetching thread from: {url}`, { url });
 
   try {
-    const thread = await getLongestThread(createPostIdFromString(url), {
+    const thread = await getLongestThread(createPostIdFromString(url), commonLookupObjectOptions, {
       fetchPost,
-      fetchReplies,
+      fetchReplies: repliesFetcher,
     });
 
     if (thread.length === 0) {

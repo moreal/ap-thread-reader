@@ -65,7 +65,7 @@ describe("getPossibleThreads", () => {
       fetchReplies: vi.fn().mockResolvedValue([]),
     };
 
-    const threads = await getPossibleThreads(post.id, deps);
+    const threads = await getPossibleThreads(post.id, {}, deps);
 
     expect(threads).toHaveLength(1);
     expect(threads[0]).toHaveLength(1);
@@ -74,7 +74,10 @@ describe("getPossibleThreads", () => {
 
   it("self-reply 체인을 따라가야 함", async () => {
     const alice = "https://example.com/users/alice";
-    const postA = createMockPost({ id: "https://example.com/A", authorId: alice });
+    const postA = createMockPost({
+      id: "https://example.com/A",
+      authorId: alice,
+    });
     const postB = createMockPost({
       id: "https://example.com/B",
       authorId: alice,
@@ -95,17 +98,21 @@ describe("getPossibleThreads", () => {
         };
         return Promise.resolve(posts[id.href] || null);
       }),
-      fetchReplies: vi.fn().mockImplementation((id: PostId) => {
+      fetchReplies: vi.fn().mockImplementation((post: Post) => {
         const replies: Record<string, Post[]> = {
           "https://example.com/A": [postB],
           "https://example.com/B": [postC],
           "https://example.com/C": [],
         };
-        return Promise.resolve(replies[id.href] || []);
+        return Promise.resolve(replies[post.id.href] || []);
       }),
     };
 
-    const threads = await getPossibleThreads(createPostIdFromString("https://example.com/A"), deps);
+    const threads = await getPossibleThreads(
+      createPostIdFromString("https://example.com/A"),
+      {},
+      deps,
+    );
 
     expect(threads).toHaveLength(1);
     expect(threads[0]).toHaveLength(3);
@@ -119,7 +126,10 @@ describe("getPossibleThreads", () => {
   it("다른 사용자의 답글은 무시해야 함", async () => {
     const alice = "https://example.com/users/alice";
     const bob = "https://example.com/users/bob";
-    const postA = createMockPost({ id: "https://example.com/A", authorId: alice });
+    const postA = createMockPost({
+      id: "https://example.com/A",
+      authorId: alice,
+    });
     const postB = createMockPost({
       id: "https://example.com/B",
       authorId: bob,
@@ -131,7 +141,11 @@ describe("getPossibleThreads", () => {
       fetchReplies: vi.fn().mockResolvedValue([postB]),
     };
 
-    const threads = await getPossibleThreads(createPostIdFromString("https://example.com/A"), deps);
+    const threads = await getPossibleThreads(
+      createPostIdFromString("https://example.com/A"),
+      {},
+      deps,
+    );
 
     expect(threads).toHaveLength(1);
     expect(threads[0]).toHaveLength(1);
@@ -139,7 +153,10 @@ describe("getPossibleThreads", () => {
 
   it("분기가 있을 때 여러 스레드 반환", async () => {
     const alice = "https://example.com/users/alice";
-    const postA = createMockPost({ id: "https://example.com/A", authorId: alice });
+    const postA = createMockPost({
+      id: "https://example.com/A",
+      authorId: alice,
+    });
     const postB = createMockPost({
       id: "https://example.com/B",
       authorId: alice,
@@ -160,17 +177,21 @@ describe("getPossibleThreads", () => {
         };
         return Promise.resolve(posts[id.href] || null);
       }),
-      fetchReplies: vi.fn().mockImplementation((id: PostId) => {
+      fetchReplies: vi.fn().mockImplementation((post: Post) => {
         const replies: Record<string, Post[]> = {
           "https://example.com/A": [postB, postC], // 두 개의 self-reply
           "https://example.com/B": [],
           "https://example.com/C": [],
         };
-        return Promise.resolve(replies[id.href] || []);
+        return Promise.resolve(replies[post.id.href] || []);
       }),
     };
 
-    const threads = await getPossibleThreads(createPostIdFromString("https://example.com/A"), deps);
+    const threads = await getPossibleThreads(
+      createPostIdFromString("https://example.com/A"),
+      {},
+      deps,
+    );
 
     expect(threads).toHaveLength(2);
     expect(threads[0].map((p) => p.id.href)).toEqual([
@@ -191,6 +212,7 @@ describe("getPossibleThreads", () => {
 
     const threads = await getPossibleThreads(
       createPostIdFromString("https://example.com/nonexistent"),
+      {},
       deps,
     );
 
@@ -201,7 +223,10 @@ describe("getPossibleThreads", () => {
 describe("getLongestThread", () => {
   it("분기가 있을 때 가장 긴 스레드 반환", async () => {
     const alice = "https://example.com/users/alice";
-    const postA = createMockPost({ id: "https://example.com/A", authorId: alice });
+    const postA = createMockPost({
+      id: "https://example.com/A",
+      authorId: alice,
+    });
     const postB = createMockPost({
       id: "https://example.com/B",
       authorId: alice,
@@ -228,18 +253,22 @@ describe("getLongestThread", () => {
         };
         return Promise.resolve(posts[id.href] || null);
       }),
-      fetchReplies: vi.fn().mockImplementation((id: PostId) => {
+      fetchReplies: vi.fn().mockImplementation((post: Post) => {
         const replies: Record<string, Post[]> = {
           "https://example.com/A": [postB, postD], // 분기: B와 D 모두 self-reply
           "https://example.com/B": [postC],
           "https://example.com/C": [],
           "https://example.com/D": [],
         };
-        return Promise.resolve(replies[id.href] || []);
+        return Promise.resolve(replies[post.id.href] || []);
       }),
     };
 
-    const thread = await getLongestThread(createPostIdFromString("https://example.com/A"), deps);
+    const thread = await getLongestThread(
+      createPostIdFromString("https://example.com/A"),
+      {},
+      deps,
+    );
 
     // A -> B -> C (길이 3) vs A -> D (길이 2)
     expect(thread).toHaveLength(3);
@@ -258,6 +287,7 @@ describe("getLongestThread", () => {
 
     const thread = await getLongestThread(
       createPostIdFromString("https://example.com/nonexistent"),
+      {},
       deps,
     );
 

@@ -3,23 +3,20 @@ import {
   Article,
   Note,
   isActor,
-  Link,
   getDocumentLoader,
   kvCache,
   MemoryKvStore,
+  traverseCollection,
 } from "@fedify/fedify";
 import { Temporal } from "@js-temporal/polyfill";
 import { Agent, setGlobalDispatcher } from "undici";
-import type { Object as APObject, DocumentLoader } from "@fedify/fedify";
-import type {
-  Post,
-  PostId,
-  PostFetchFn,
-  RepliesFetchFn,
-  Author,
-} from "@/domain/types";
+import type { Object as APObject, DocumentLoader, LookupObjectOptions } from "@fedify/fedify";
+import type { Post, PostId, PostFetchFn, RepliesFetchFn, Author } from "@/domain/types";
 import { createPostId } from "@/domain/types";
 import { activitypubLogger } from "@/logging";
+
+// Author 캐시 - 동일 작성자를 반복 fetch하지 않도록 캐싱
+const authorCache = new Map<string, Author>();
 
 // 전역 HTTP Agent 최적화 - Keep-Alive 연결 재사용
 const agent = new Agent({
@@ -29,7 +26,6 @@ const agent = new Agent({
   pipelining: 1,
 });
 setGlobalDispatcher(agent);
-setInterval(() => console.log(agent.stats), 1000);
 
 // 캐시된 DocumentLoader 설정
 const kv = new MemoryKvStore();
@@ -38,25 +34,16 @@ const cachedDocumentLoader: DocumentLoader = kvCache({
   kv,
   rules: [
     // JSON-LD 컨텍스트는 오래 캐싱 (30일)
-    [
-      new URLPattern("https://www.w3.org/*"),
-      Temporal.Duration.from({ days: 30 }),
-    ],
-    [
-      new URLPattern("https://w3id.org/*"),
-      Temporal.Duration.from({ days: 30 }),
-    ],
+    [new URLPattern("https://www.w3.org/*"), Temporal.Duration.from({ days: 30 })],
+    [new URLPattern("https://w3id.org/*"), Temporal.Duration.from({ days: 30 })],
     // ActivityStreams 컨텍스트
-    [
-      new URLPattern("https://www.w3.org/ns/activitystreams"),
-      Temporal.Duration.from({ days: 30 }),
-    ],
+    [new URLPattern("https://www.w3.org/ns/activitystreams"), Temporal.Duration.from({ days: 30 })],
     // 일반 ActivityPub 객체는 짧게 캐싱 (5분)
     [new URLPattern("*://*/*"), Temporal.Duration.from({ minutes: 5 })],
   ],
 });
 
-const lookupOptions = {
+export const commonLookupObjectOptions = {
   documentLoader: cachedDocumentLoader,
   contextLoader: cachedDocumentLoader,
 };
@@ -83,28 +70,28 @@ export async function toPost(obj: APObject): Promise<Post | null> {
     return null;
   }
 
-  // Fetch author information
-  let author: Author | null = null;
-  try {
-    const actor = await obj.getAttribution();
-    if (actor && isActor(actor)) {
-      const actorUrl = actor.url;
-      author = {
-        id: authorId,
-        name:
-          actor.name?.toString() ??
-          actor.preferredUsername?.toString() ??
-          authorId,
-        url:
-          actorUrl instanceof URL
-            ? actorUrl.href
-            : typeof actorUrl === "string"
-              ? actorUrl
-              : null,
-      };
+  // Fetch author information (with cache)
+  let author: Author | null = authorCache.get(authorId) ?? null;
+  if (!author) {
+    try {
+      const actor = await obj.getAttribution();
+      if (actor && isActor(actor)) {
+        const actorUrl = actor.url;
+        author = {
+          id: authorId,
+          name: actor.name?.toString() ?? actor.preferredUsername?.toString() ?? authorId,
+          url:
+            actorUrl instanceof URL
+              ? actorUrl.href
+              : typeof actorUrl === "string"
+                ? actorUrl
+                : null,
+        };
+        authorCache.set(authorId, author);
+      }
+    } catch (error) {
+      activitypubLogger.debug`Failed to fetch author for ${id}: ${error}`;
     }
-  } catch (error) {
-    activitypubLogger.debug`Failed to fetch author for ${id}: ${error}`;
   }
 
   const content = obj.content?.toString() ?? "";
@@ -112,12 +99,7 @@ export async function toPost(obj: APObject): Promise<Post | null> {
   const publishedAt = published?.toString() ?? new Date().toISOString();
   const inReplyTo = obj.replyTargetId ? createPostId(obj.replyTargetId) : null;
   const objUrl = obj.url;
-  const url =
-    objUrl instanceof URL
-      ? objUrl.href
-      : typeof objUrl === "string"
-        ? objUrl
-        : null;
+  const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
 
   return {
     id,
@@ -127,96 +109,151 @@ export async function toPost(obj: APObject): Promise<Post | null> {
     publishedAt,
     inReplyTo,
     url,
+    _apObjectRef: obj,
   };
 }
 
 /**
  * ActivityPub 객체를 조회합니다.
  */
-export async function fetchPost(postId: PostId): Promise<Post | null> {
-  activitypubLogger.debug`Fetching post: ${postId}`;
+export async function fetchPost(
+  postId: PostId,
+  options: LookupObjectOptions,
+): Promise<Post | null> {
+  activitypubLogger.debug`Fetching post: ${postId.toString()}`;
 
   try {
-    const obj = await lookupObject(postId, lookupOptions);
+    const obj = await lookupObject(postId, options);
     if (!obj) {
-      activitypubLogger.warn`Post not found: ${postId}`;
+      activitypubLogger.warn`Post not found: ${postId.toString()}`;
       return null;
     }
 
     if (isActor(obj)) {
-      activitypubLogger.warn`Object is an Actor, not a Post: ${postId}`;
+      activitypubLogger.warn`Object is an Actor, not a Post: ${postId.toString()}`;
       return null;
     }
 
     const post = await toPost(obj as APObject);
     if (post) {
-      activitypubLogger.debug`Successfully fetched post: ${postId}`;
+      activitypubLogger.debug`Successfully fetched post: ${postId.toString()}`;
     }
     return post;
   } catch (error) {
-    activitypubLogger.error`Failed to fetch post ${postId}: ${error}`;
+    activitypubLogger.error`Failed to fetch post ${postId.toString()}: ${error}`;
     return null;
   }
 }
 
 /**
- * CollectionPage를 순회하며 아이템을 수집합니다.
+ * APObject에서 직접 답글을 가져오는 내부 함수
  */
-async function* iterateCollectionPages(
-  firstPage: Awaited<
-    ReturnType<typeof import("@fedify/fedify").Collection.prototype.getFirst>
-  >,
-): AsyncGenerator<APObject> {
-  let currentPage = firstPage;
-  const seenUrls = new Set<string>();
+async function fetchRepliesFromObject(
+  obj: Note | Article,
+  options: LookupObjectOptions,
+  authorFilter?: string,
+): Promise<Post[]> {
+  const postId = obj.id?.href ?? "unknown";
 
-  while (currentPage) {
-    // Get items from current page
-    try {
-      for await (const item of currentPage.getItems()) {
-        if (item && !(item instanceof Link)) {
-          yield item;
+  const repliesCollection = await obj.getReplies();
+  activitypubLogger.debug`Replies collection type: ${repliesCollection?.constructor.name ?? "null"}`;
+
+  if (!repliesCollection) {
+    activitypubLogger.debug`No replies collection for: ${postId}`;
+    return [];
+  }
+
+  activitypubLogger.debug`Replies collection id: ${repliesCollection.id?.href ?? "no id"}`;
+
+  const posts: Post[] = [];
+  let itemCount = 0;
+
+  const firstPage = await repliesCollection.getFirst(options);
+  if (firstPage) {
+    activitypubLogger.debug`Trying paginated replies for: ${postId.toString()}`;
+    const pageItems: APObject[] = [];
+
+    for await (const item of traverseCollection(firstPage)) {
+      itemCount++;
+      activitypubLogger.debug`Reply item ${itemCount}: ${item?.constructor.name ?? "null"}, id: ${item?.id?.href ?? "no id"}`;
+
+      if (item instanceof Note || item instanceof Article) {
+        if (authorFilter && item.attributionId?.href !== authorFilter) {
+          // authorFilter가 있으면 toPost 변환 전에 미리 필터링
+          activitypubLogger.debug`Skipping reply from different author: ${item.attributionId?.href}`;
+          continue;
         }
+
+        pageItems.push(item);
       }
-    } catch (error) {
-      activitypubLogger.debug`Error iterating page items: ${error}`;
-      // Continue to try next page even if current page has errors
+    }
+    // 병렬로 toPost 변환
+    const results = await Promise.all(pageItems.map(toPost));
+    for (const post of results) {
+      if (post) {
+        posts.push(post);
+        activitypubLogger.debug`Converted reply to post: ${post.id.toString()}`;
+      }
+    }
+  }
+
+  activitypubLogger.debug`Found ${posts.length} replies for: ${postId} (iterated ${itemCount} items)`;
+  return posts;
+}
+
+/**
+ * Post 객체에서 답글 목록을 가져옵니다.
+ * _apObjectRef가 있으면 재사용하여 lookupObject 호출을 스킵합니다.
+ * @param post - 답글을 가져올 포스트 객체
+ * @param authorFilter - 특정 작성자의 답글만 필터링 (optional)
+ */
+export async function fetchRepliesForPost(
+  post: Post,
+  options: LookupObjectOptions,
+  authorFilter?: string,
+): Promise<Post[]> {
+  activitypubLogger.debug`Fetching replies for: ${post.id.toString()}`;
+
+  try {
+    // _apObjectRef가 있으면 재사용하여 lookupObject RTT 제거
+    let obj: Note | Article | null = null;
+    if (post._apObjectRef) {
+      obj = post._apObjectRef;
+    } else {
+      // fallback: lookupObject로 다시 fetch
+      const looked = await lookupObject(post.id, options);
+      if (!looked) {
+        activitypubLogger.warn`Post not found when fetching replies: ${post.id.toString()}`;
+        return [];
+      }
+      if (!(looked instanceof Note) && !(looked instanceof Article)) {
+        activitypubLogger.warn`Object is not a Note or Article: ${post.id.toString()}`;
+        return [];
+      }
+      obj = looked;
     }
 
-    // Get next page
-    const nextUrl = currentPage.nextId?.href;
-    if (!nextUrl || seenUrls.has(nextUrl)) {
-      break;
-    }
-    seenUrls.add(nextUrl);
-
-    activitypubLogger.debug`Fetching next page: ${nextUrl}`;
-    try {
-      const nextObj = await lookupObject(nextUrl, lookupOptions);
-      if (!nextObj || !("getItems" in nextObj)) {
-        break;
-      }
-      currentPage = nextObj as typeof currentPage;
-    } catch (error) {
-      activitypubLogger.debug`Error fetching next page: ${error}`;
-      break;
-    }
+    return await fetchRepliesFromObject(obj, options, authorFilter);
+  } catch (error) {
+    activitypubLogger.error`Failed to fetch replies for ${post.id.toString()}: ${error}`;
+    return [];
   }
 }
 
 /**
- * 포스트의 답글 목록을 가져옵니다.
+ * 포스트의 답글 목록을 가져옵니다 (레거시 - PostId 기반).
  * @param postId - 답글을 가져올 포스트의 ID
- * @param authorFilter - 특정 작성자의 답글만 필터링 (optional, toPost 변환 전에 필터링하여 성능 최적화)
+ * @param authorFilter - 특정 작성자의 답글만 필터링 (optional)
  */
 export async function fetchReplies(
   postId: PostId,
+  options: LookupObjectOptions,
   authorFilter?: string,
 ): Promise<Post[]> {
   activitypubLogger.debug`Fetching replies for: ${postId}`;
 
   try {
-    const obj = await lookupObject(postId, lookupOptions);
+    const obj = await lookupObject(postId, options);
     if (!obj) {
       activitypubLogger.warn`Post not found when fetching replies: ${postId}`;
       return [];
@@ -227,69 +264,7 @@ export async function fetchReplies(
       return [];
     }
 
-    const repliesCollection = await obj.getReplies();
-    activitypubLogger.debug`Replies collection type: ${repliesCollection?.constructor.name ?? "null"}`;
-
-    if (!repliesCollection) {
-      activitypubLogger.debug`No replies collection for: ${postId}`;
-      return [];
-    }
-
-    activitypubLogger.debug`Replies collection id: ${repliesCollection.id?.href ?? "no id"}`;
-
-    const posts: Post[] = [];
-    let itemCount = 0;
-
-    // First, try to get items directly from the collection (inline items)
-    try {
-      for await (const item of repliesCollection.getItems()) {
-        itemCount++;
-        activitypubLogger.debug`Reply item ${itemCount}: ${item?.constructor.name ?? "null"}, id: ${item?.id?.href ?? "no id"}`;
-
-        if (item instanceof Note || item instanceof Article) {
-          // authorFilter가 있으면 toPost 변환 전에 미리 필터링
-          if (authorFilter && item.attributionId?.href !== authorFilter) {
-            activitypubLogger.debug`Skipping reply from different author: ${item.attributionId?.href}`;
-            continue;
-          }
-          const post = await toPost(item);
-          if (post) {
-            posts.push(post);
-            activitypubLogger.debug`Converted reply to post: ${post.id}`;
-          }
-        }
-      }
-    } catch (error) {
-      activitypubLogger.debug`Error getting inline items, trying pagination: ${error}`;
-    }
-
-    // If no items found inline, try pagination
-    if (posts.length === 0) {
-      const firstPage = await repliesCollection.getFirst();
-      if (firstPage) {
-        activitypubLogger.debug`Trying paginated replies for: ${postId}`;
-        for await (const item of iterateCollectionPages(firstPage)) {
-          itemCount++;
-          activitypubLogger.debug`Reply item ${itemCount}: ${item?.constructor.name ?? "null"}, id: ${item?.id?.href ?? "no id"}`;
-
-          if (item instanceof Note || item instanceof Article) {
-            // authorFilter가 있으면 toPost 변환 전에 미리 필터링
-            if (authorFilter && item.attributionId?.href !== authorFilter) {
-              activitypubLogger.debug`Skipping reply from different author: ${item.attributionId?.href}`;
-              continue;
-            }
-            const post = await toPost(item);
-            if (post) {
-              posts.push(post);
-              activitypubLogger.debug`Converted reply to post: ${post.id}`;
-            }
-          }
-        }
-      }
-    }
-
-    activitypubLogger.debug`Found ${posts.length} replies for: ${postId} (iterated ${itemCount} items)`;
-    return posts;
+    return await fetchRepliesFromObject(obj, options, authorFilter);
   } catch (error) {
     activitypubLogger.error`Failed to fetch replies for ${postId}: ${error}`;
     return [];
@@ -318,6 +293,6 @@ export function isValidPostUrl(url: string): boolean {
 export const postFetcher: PostFetchFn = fetchPost;
 
 /**
- * RepliesFetchFn 구현
+ * RepliesFetchFn 구현 (Post 객체 기반, lookupObject 재호출 방지)
  */
-export const repliesFetcher: RepliesFetchFn = fetchReplies;
+export const repliesFetcher: RepliesFetchFn = fetchRepliesForPost;

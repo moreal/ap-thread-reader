@@ -89,7 +89,7 @@ describe("fetchReplies", () => {
     });
 
     const { fetchReplies } = await import("./activitypub");
-    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"));
+    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"), {});
 
     expect(replies).toHaveLength(1);
     expect(replies[0].id.href).toBe("https://example.com/reply/1");
@@ -148,7 +148,7 @@ describe("fetchReplies", () => {
     });
 
     const { fetchReplies } = await import("./activitypub");
-    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"));
+    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"), {});
 
     expect(replies).toHaveLength(1);
     expect(replies[0].content).toBe("<p>Paginated reply</p>");
@@ -180,7 +180,7 @@ describe("fetchReplies", () => {
     });
 
     const { fetchReplies } = await import("./activitypub");
-    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"));
+    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"), {});
 
     expect(replies).toHaveLength(0);
   });
@@ -219,7 +219,7 @@ describe("fetchReplies", () => {
     });
 
     const { fetchReplies } = await import("./activitypub");
-    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"));
+    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"), {});
 
     expect(replies).toHaveLength(0);
   });
