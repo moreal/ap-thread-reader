@@ -70,6 +70,9 @@ export interface Post {
   /** HTML 형식의 본문 */
   content: string;
 
+  /** 요약 (선택적) */
+  summary: string | null;
+
   /** 작성 시간 (ISO 8601) */
   publishedAt: string;
 
@@ -124,6 +127,7 @@ export interface SerializablePost {
   authorId: AuthorId;
   author: Author | null;
   content: string;
+  summary: string | null;
   publishedAt: string;
   inReplyTo: string | null;
   url: string | null;
@@ -143,6 +147,7 @@ export function toSerializablePost(post: Post): SerializablePost {
     authorId: post.authorId,
     author: post.author,
     content: post.content,
+    summary: post.summary,
     publishedAt: post.publishedAt,
     inReplyTo: post.inReplyTo?.href ?? null,
     url: post.url,
@@ -165,6 +170,7 @@ export function fromSerializablePost(post: SerializablePost): Post {
     authorId: post.authorId,
     author: post.author,
     content: post.content,
+    summary: post.summary,
     publishedAt: post.publishedAt,
     inReplyTo: post.inReplyTo ? createPostIdFromString(post.inReplyTo) : null,
     url: post.url,

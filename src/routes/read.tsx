@@ -36,6 +36,26 @@ export const Route = createFileRoute("/read")({
     // Otherwise, return pending state for client-side fetch
     return { thread: null, error: null, pending: true, url: deps.url };
   },
+  head: ({ loaderData }) => {
+    // Use summary from the first post in the thread if available
+    if (loaderData?.thread && loaderData.thread.length > 0) {
+      const firstPost = loaderData.thread[0];
+      if (firstPost.summary) {
+        const authorName = firstPost.author?.name || "Unknown";
+        const description = `${authorName}'s thread - ${firstPost.summary}`;
+        return {
+          meta: [
+            {
+              name: "description",
+              content: description,
+            },
+          ],
+        };
+      }
+    }
+    // Return empty object if no summary is available (falls back to root meta tags)
+    return {};
+  },
   pendingComponent: LoadingPage,
   component: ReadPage,
 });

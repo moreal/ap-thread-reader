@@ -95,6 +95,7 @@ export async function toPost(obj: APObject): Promise<Post | null> {
   }
 
   const content = obj.content?.toString() ?? "";
+  const summary = obj.summary?.toString() ?? null;
   const published = obj.published;
   const publishedAt = published?.toString() ?? new Date().toISOString();
   const inReplyTo = obj.replyTargetId ? createPostId(obj.replyTargetId) : null;
@@ -106,6 +107,7 @@ export async function toPost(obj: APObject): Promise<Post | null> {
     authorId,
     author,
     content,
+    summary,
     publishedAt,
     inReplyTo,
     url,
