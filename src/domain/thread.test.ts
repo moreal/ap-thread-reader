@@ -9,6 +9,7 @@ interface MockPostOverrides {
   authorId?: string;
   author?: { id: string; name: string; url: string | null } | null;
   content?: string;
+  summary?: string | null;
   publishedAt?: string;
   inReplyTo?: string | null;
   url?: string | null;
@@ -21,6 +22,7 @@ function createMockPost(overrides: MockPostOverrides = {}): Post {
     authorId: overrides.authorId ?? "https://example.com/users/alice",
     author: overrides.author ?? null,
     content: overrides.content ?? "<p>Test content</p>",
+    summary: overrides.summary ?? null,
     publishedAt: overrides.publishedAt ?? "2024-01-01T00:00:00Z",
     inReplyTo: overrides.inReplyTo ? createPostIdFromString(overrides.inReplyTo) : null,
     url: overrides.url ?? "https://example.com/@alice/1",
