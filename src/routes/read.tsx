@@ -41,11 +41,13 @@ export const Route = createFileRoute("/read")({
     if (loaderData?.thread && loaderData.thread.length > 0) {
       const firstPost = loaderData.thread[0];
       if (firstPost.summary) {
+        const authorName = firstPost.author?.name || "Unknown";
+        const description = `${authorName}'s thread - ${firstPost.summary}`;
         return {
           meta: [
             {
               name: "description",
-              content: firstPost.summary,
+              content: description,
             },
           ],
         };
