@@ -102,10 +102,13 @@ describe("fetchReplies", () => {
       id: { href: "https://example.com/reply/1" },
       attributionId: { href: "https://example.com/user/1" },
       content: { toString: () => "<p>Paginated reply</p>" },
+      contents: [],
       summary: null,
+      summaries: [],
       published: { toString: () => "2024-01-01T00:00:00Z" },
       replyTargetId: { href: "https://example.com/post/1" },
       url: new URL("https://example.com/reply/1"),
+      getAttribution: async () => null,
     };
 
     const mockFirstPage = {

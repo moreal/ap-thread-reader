@@ -7,6 +7,7 @@ import {
   kvCache,
   MemoryKvStore,
   traverseCollection,
+  LanguageString,
 } from "@fedify/fedify";
 import { Temporal } from "@js-temporal/polyfill";
 import { Agent, setGlobalDispatcher } from "undici";
@@ -102,12 +103,34 @@ export async function toPost(obj: APObject): Promise<Post | null> {
   const objUrl = obj.url;
   const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
 
+  // Extract contentMap from contents array
+  const contentMap: Record<string, string> = {};
+  const contents = obj.contents;
+  for (const item of contents) {
+    if (item instanceof LanguageString) {
+      const lang = item.language.toString();
+      contentMap[lang] = item.toString();
+    }
+  }
+
+  // Extract summaryMap from summaries array
+  const summaryMap: Record<string, string> = {};
+  const summaries = obj.summaries;
+  for (const item of summaries) {
+    if (item instanceof LanguageString) {
+      const lang = item.language.toString();
+      summaryMap[lang] = item.toString();
+    }
+  }
+
   return {
     id,
     authorId,
     author,
     content,
     summary,
+    contentMap: Object.keys(contentMap).length > 0 ? contentMap : undefined,
+    summaryMap: Object.keys(summaryMap).length > 0 ? summaryMap : undefined,
     publishedAt,
     inReplyTo,
     url,

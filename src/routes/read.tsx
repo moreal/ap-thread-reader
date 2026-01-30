@@ -8,6 +8,7 @@ import { fetchThreadData, type ThreadResult } from "@/lib/api.functions";
 interface ReadSearchParams {
   url: string;
   ssr?: boolean;
+  language?: string;
 }
 
 interface LoaderResult extends ThreadResult {
@@ -20,8 +21,9 @@ export const Route = createFileRoute("/read")({
   validateSearch: (search: Record<string, unknown>): ReadSearchParams => ({
     url: (search.url as string) || "",
     ssr: search.ssr === "true" || search.ssr === true,
+    language: (search.language as string) || undefined,
   }),
-  loaderDeps: ({ search }) => ({ url: search.url, ssr: search.ssr }),
+  loaderDeps: ({ search }) => ({ url: search.url, ssr: search.ssr, language: search.language }),
   loader: async ({ deps }): Promise<LoaderResult> => {
     if (!deps.url) {
       return { thread: null, error: "No URL provided", url: deps.url };
@@ -29,7 +31,9 @@ export const Route = createFileRoute("/read")({
 
     // Only fetch on server when ssr=true
     if (deps.ssr) {
-      const result = await fetchThreadData({ data: deps.url });
+      const result = await fetchThreadData({
+        data: { data: deps.url, language: deps.language },
+      });
       return { ...result, url: deps.url };
     }
 
@@ -93,6 +97,7 @@ function LoadingPage() {
 
 function ReadPage() {
   const loaderData = Route.useLoaderData();
+  const search = Route.useSearch();
   const location = useLocation();
   const fromIndex = (location.state as { fromIndex?: boolean })?.fromIndex;
   const [data, setData] = useState<ThreadResult>({
@@ -104,11 +109,13 @@ function ReadPage() {
   useEffect(() => {
     if (loaderData.pending && loaderData.url) {
       setLoading(true);
-      fetchThreadData({ data: loaderData.url })
+      fetchThreadData({
+        data: { data: loaderData.url, language: search.language },
+      })
         .then(setData)
         .finally(() => setLoading(false));
     }
-  }, [loaderData.pending, loaderData.url]);
+  }, [loaderData.pending, loaderData.url, search.language]);
 
   // Sync with loader data when it changes (e.g., ssr=true case)
   useEffect(() => {

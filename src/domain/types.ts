@@ -73,6 +73,12 @@ export interface Post {
   /** 요약 (선택적) */
   summary: string | null;
 
+  /** 언어별 본문 맵 (BCP 47 언어 태그 -> HTML 콘텐츠) */
+  contentMap?: Record<string, string>;
+
+  /** 언어별 요약 맵 (BCP 47 언어 태그 -> 요약 텍스트) */
+  summaryMap?: Record<string, string>;
+
   /** 작성 시간 (ISO 8601) */
   publishedAt: string;
 
@@ -128,6 +134,8 @@ export interface SerializablePost {
   author: Author | null;
   content: string;
   summary: string | null;
+  contentMap?: Record<string, string>;
+  summaryMap?: Record<string, string>;
   publishedAt: string;
   inReplyTo: string | null;
   url: string | null;
@@ -148,6 +156,8 @@ export function toSerializablePost(post: Post): SerializablePost {
     author: post.author,
     content: post.content,
     summary: post.summary,
+    contentMap: post.contentMap,
+    summaryMap: post.summaryMap,
     publishedAt: post.publishedAt,
     inReplyTo: post.inReplyTo?.href ?? null,
     url: post.url,
@@ -171,6 +181,8 @@ export function fromSerializablePost(post: SerializablePost): Post {
     author: post.author,
     content: post.content,
     summary: post.summary,
+    contentMap: post.contentMap,
+    summaryMap: post.summaryMap,
     publishedAt: post.publishedAt,
     inReplyTo: post.inReplyTo ? createPostIdFromString(post.inReplyTo) : null,
     url: post.url,
@@ -182,4 +194,80 @@ export function fromSerializablePost(post: SerializablePost): Post {
  */
 export function fromSerializableThread(thread: SerializableThread): Thread {
   return thread.map(fromSerializablePost);
+}
+
+/**
+ * 언어 맵에서 특정 언어의 콘텐츠를 가져옵니다.
+ * 요청한 언어가 없으면 기본 콘텐츠를 반환합니다.
+ * @param defaultContent 기본 콘텐츠
+ * @param contentMap 언어별 콘텐츠 맵
+ * @param language 요청한 언어 (BCP 47 언어 태그)
+ * @returns 선택된 언어의 콘텐츠 또는 기본 콘텐츠
+ */
+export function selectLanguageContent(
+  defaultContent: string,
+  contentMap: Record<string, string> | undefined,
+  language: string | undefined,
+): string {
+  if (!language || !contentMap) {
+    return defaultContent;
+  }
+
+  // Exact match
+  if (contentMap[language]) {
+    return contentMap[language];
+  }
+
+  // Try language without region (e.g., "en" from "en-US")
+  const baseLanguage = language.split("-")[0];
+  if (baseLanguage && contentMap[baseLanguage]) {
+    return contentMap[baseLanguage];
+  }
+
+  // Fallback to default
+  return defaultContent;
+}
+
+/**
+ * 언어에 따라 Post의 content와 summary를 적용합니다.
+ * Post 객체를 직접 수정하지 않고 새 객체를 반환합니다.
+ */
+export function applyLanguageToPost(post: Post, language: string | undefined): Post {
+  if (!language) {
+    return post;
+  }
+
+  const content = selectLanguageContent(post.content, post.contentMap, language);
+  const summary = post.summary
+    ? selectLanguageContent(post.summary, post.summaryMap, language)
+    : null;
+
+  return {
+    ...post,
+    content,
+    summary,
+  };
+}
+
+/**
+ * 언어에 따라 SerializablePost의 content와 summary를 적용합니다.
+ */
+export function applyLanguageToSerializablePost(
+  post: SerializablePost,
+  language: string | undefined,
+): SerializablePost {
+  if (!language) {
+    return post;
+  }
+
+  const content = selectLanguageContent(post.content, post.contentMap, language);
+  const summary = post.summary
+    ? selectLanguageContent(post.summary, post.summaryMap, language)
+    : null;
+
+  return {
+    ...post,
+    content,
+    summary,
+  };
 }

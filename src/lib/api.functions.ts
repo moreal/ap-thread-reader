@@ -7,23 +7,32 @@ import {
   repliesFetcher,
 } from "@/infra/activitypub";
 import type { SerializableThread } from "@/domain/types";
-import { createPostIdFromString, toSerializableThread } from "@/domain/types";
+import {
+  createPostIdFromString,
+  toSerializableThread,
+  applyLanguageToSerializablePost,
+} from "@/domain/types";
 
 export interface ThreadResult {
   thread: SerializableThread | null;
   error: string | null;
 }
 
+interface FetchThreadDataInput {
+  data: string;
+  language?: string;
+}
+
 export const fetchThreadData = createServerFn({ method: "GET" })
-  .inputValidator((url: string) => url)
-  .handler(async ({ data: url }): Promise<ThreadResult> => {
-    if (!url || !isValidPostUrl(url)) {
+  .inputValidator((input: FetchThreadDataInput) => input)
+  .handler(async ({ data: input }): Promise<ThreadResult> => {
+    if (!input.data || !isValidPostUrl(input.data)) {
       return { thread: null, error: "Invalid URL" };
     }
 
     try {
       const thread = await getLongestThread(
-        createPostIdFromString(url),
+        createPostIdFromString(input.data),
         commonLookupObjectOptions,
         {
           fetchPost,
@@ -35,7 +44,16 @@ export const fetchThreadData = createServerFn({ method: "GET" })
         return { thread: null, error: "No posts found in thread" };
       }
 
-      return { thread: toSerializableThread(thread), error: null };
+      let serializableThread = toSerializableThread(thread);
+
+      // Apply language if specified
+      if (input.language) {
+        serializableThread = serializableThread.map((post) =>
+          applyLanguageToSerializablePost(post, input.language),
+        );
+      }
+
+      return { thread: serializableThread, error: null };
     } catch (error) {
       console.error("Failed to fetch thread:", error);
       return { thread: null, error: "Failed to fetch thread" };
