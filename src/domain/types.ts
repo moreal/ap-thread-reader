@@ -231,6 +231,9 @@ export function selectLanguageContent(
 /**
  * 언어에 따라 Post의 content와 summary를 적용합니다.
  * Post 객체를 직접 수정하지 않고 새 객체를 반환합니다.
+ * @param post - 원본 Post 객체
+ * @param language - 요청한 언어 (BCP 47 언어 태그, 선택적)
+ * @returns 언어가 적용된 새 Post 객체 (언어 미지정시 원본 반환)
  */
 export function applyLanguageToPost(post: Post, language: string | undefined): Post {
   if (!language) {
@@ -251,6 +254,9 @@ export function applyLanguageToPost(post: Post, language: string | undefined): P
 
 /**
  * 언어에 따라 SerializablePost의 content와 summary를 적용합니다.
+ * @param post - 원본 SerializablePost 객체
+ * @param language - 요청한 언어 (BCP 47 언어 태그, 선택적)
+ * @returns 언어가 적용된 새 SerializablePost 객체 (언어 미지정시 원본 반환)
  */
 export function applyLanguageToSerializablePost(
   post: SerializablePost,

@@ -104,6 +104,7 @@ export async function toPost(obj: APObject): Promise<Post | null> {
   const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
 
   // Extract contentMap from contents array
+  // This enables language-specific content support via BCP 47 language tags
   const contentMap: Record<string, string> = {};
   const contents = obj.contents;
   for (const item of contents) {
@@ -114,6 +115,7 @@ export async function toPost(obj: APObject): Promise<Post | null> {
   }
 
   // Extract summaryMap from summaries array
+  // This enables language-specific summary support via BCP 47 language tags
   const summaryMap: Record<string, string> = {};
   const summaries = obj.summaries;
   for (const item of summaries) {

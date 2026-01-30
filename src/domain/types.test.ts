@@ -31,6 +31,18 @@ describe("selectLanguageContent", () => {
     const result = selectLanguageContent("default content", contentMap, "fr");
     expect(result).toBe("default content");
   });
+
+  it("빈 문자열 언어는 기본 콘텐츠를 반환해야 함", () => {
+    const contentMap = { en: "English content", ko: "한국어 콘텐츠" };
+    const result = selectLanguageContent("default content", contentMap, "");
+    expect(result).toBe("default content");
+  });
+
+  it("빈 contentMap이면 기본 콘텐츠를 반환해야 함", () => {
+    const contentMap = {};
+    const result = selectLanguageContent("default content", contentMap, "en");
+    expect(result).toBe("default content");
+  });
 });
 
 describe("applyLanguageToPost", () => {
