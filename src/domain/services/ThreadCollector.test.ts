@@ -26,6 +26,7 @@ function createMockPost(overrides: MockPostOverrides = {}): Post {
     publishedAt: overrides.publishedAt ?? "2024-01-01T00:00:00Z",
     inReplyTo: overrides.inReplyTo ? createPostIdFromString(overrides.inReplyTo) : null,
     url: overrides.url ?? "https://example.com/@alice/1",
+    summary: null,
   };
 }
 

@@ -213,4 +213,68 @@ describe("ActivityPubPostRepository", () => {
       expect(replies).toHaveLength(0);
     }
   });
+
+  it("포스트에서 summary를 추출해야 함", async () => {
+    const mockPost = createCompleteMockPost({
+      summary: { toString: () => "This is a summary of the post" },
+    });
+
+    vi.doMock("@fedify/fedify", async (importOriginal) => {
+      const original = await importOriginal<typeof import("@fedify/fedify")>();
+      return {
+        ...original,
+        lookupObject: vi.fn().mockResolvedValue(mockPost),
+        Note: class MockNote {
+          static [Symbol.hasInstance](obj: unknown) {
+            return obj === mockPost;
+          }
+        },
+        Article: class MockArticle {
+          static [Symbol.hasInstance]() {
+            return false;
+          }
+        },
+        isActor: () => false,
+      };
+    });
+
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(createPostIdFromString("https://example.com/post/1"));
+
+    expect(post).not.toBeNull();
+    expect(post?.summary).toBe("This is a summary of the post");
+  });
+
+  it("summary가 없으면 null이어야 함", async () => {
+    const mockPost = createCompleteMockPost({
+      summary: null,
+    });
+
+    vi.doMock("@fedify/fedify", async (importOriginal) => {
+      const original = await importOriginal<typeof import("@fedify/fedify")>();
+      return {
+        ...original,
+        lookupObject: vi.fn().mockResolvedValue(mockPost),
+        Note: class MockNote {
+          static [Symbol.hasInstance](obj: unknown) {
+            return obj === mockPost;
+          }
+        },
+        Article: class MockArticle {
+          static [Symbol.hasInstance]() {
+            return false;
+          }
+        },
+        isActor: () => false,
+      };
+    });
+
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(createPostIdFromString("https://example.com/post/1"));
+
+    expect(post).not.toBeNull();
+    expect(post?.summary).toBeNull();
+  });
 });

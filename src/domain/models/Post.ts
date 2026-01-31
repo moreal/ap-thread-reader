@@ -26,4 +26,7 @@ export interface Post {
 
   /** 원본 URL (사용자가 브라우저에서 볼 수 있는 URL) */
   url: string | null;
+
+  /** 요약 또는 짧은 설명 (ActivityStreams summary 속성) */
+  summary: string | null;
 }
