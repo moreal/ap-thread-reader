@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { formatPost, formatThread, formatThreadAsHtml } from "./formatter";
-import type { Post, Thread } from "./types";
-import { createPostIdFromString } from "./types";
+import type { Post } from "@/domain/models";
+import { createPostIdFromString } from "@/domain/values";
 
 // 테스트용 Mock Post 오버라이드 타입
 interface MockPostOverrides {
@@ -65,7 +65,7 @@ describe("formatPost", () => {
 
 describe("formatThread", () => {
   it("스레드의 모든 포스트를 기본 구분자로 연결해야 함", () => {
-    const thread: Thread = [
+    const thread = [
       createMockPost({ content: "<p>First</p>" }),
       createMockPost({ content: "<p>Second</p>" }),
       createMockPost({ content: "<p>Third</p>" }),
@@ -77,7 +77,7 @@ describe("formatThread", () => {
   });
 
   it("커스텀 구분자를 사용할 수 있어야 함", () => {
-    const thread: Thread = [
+    const thread = [
       createMockPost({ content: "<p>First</p>" }),
       createMockPost({ content: "<p>Second</p>" }),
     ];
@@ -96,7 +96,7 @@ describe("formatThread", () => {
 
 describe("formatThreadAsHtml", () => {
   it("스레드를 HTML 구조로 포맷팅해야 함", () => {
-    const thread: Thread = [
+    const thread = [
       createMockPost({ id: "https://example.com/post1", content: "<p>First</p>" }),
       createMockPost({ id: "https://example.com/post2", content: "<p>Second</p>" }),
     ];

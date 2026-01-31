@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-import { main, runCli } from "../src/cli/main";
+import { main, runCli } from "../src/presentation/cli/main";
 
 const config = runCli();
 main([config.url.href], {

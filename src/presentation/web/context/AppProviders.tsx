@@ -8,7 +8,7 @@ import {
   DEFAULT_ALLOWED_TAGS,
   DEFAULT_FORBIDDEN_TAGS,
   DEFAULT_ALLOWED_ATTRIBUTES,
-} from "@/domain/sanitizer";
+} from "@/presentation/web/sanitizer";
 import {
   activateLocale,
   detectLocale,

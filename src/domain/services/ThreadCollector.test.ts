@@ -1,7 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
-import { getPossibleThreads, getLongestThread, filterSelfReplies } from "./thread";
-import type { Post, PostId, ThreadCollectorDeps } from "./types";
-import { createPostIdFromString } from "./types";
+import { getPossibleThreads, getLongestThread, filterSelfReplies } from "./ThreadCollector";
+import type { Post } from "@/domain/models";
+import type { PostId } from "@/domain/values";
+import { createPostIdFromString } from "@/domain/values";
+import type { PostRepository } from "@/domain/ports";
 
 // 테스트용 Mock Post 오버라이드 타입
 interface MockPostOverrides {
@@ -24,6 +26,16 @@ function createMockPost(overrides: MockPostOverrides = {}): Post {
     publishedAt: overrides.publishedAt ?? "2024-01-01T00:00:00Z",
     inReplyTo: overrides.inReplyTo ? createPostIdFromString(overrides.inReplyTo) : null,
     url: overrides.url ?? "https://example.com/@alice/1",
+  };
+}
+
+function createMockRepository(
+  findByIdFn: (id: PostId) => Promise<Post | null>,
+  findRepliesFn: (post: Post, authorFilter?: string) => Promise<Post[]>,
+): PostRepository {
+  return {
+    findById: vi.fn(findByIdFn),
+    findReplies: vi.fn(findRepliesFn),
   };
 }
 
@@ -60,12 +72,12 @@ describe("filterSelfReplies", () => {
 describe("getPossibleThreads", () => {
   it("단일 포스트만 있을 때 길이 1의 스레드 반환", async () => {
     const post = createMockPost();
-    const deps: ThreadCollectorDeps = {
-      fetchPost: vi.fn().mockResolvedValue(post),
-      fetchReplies: vi.fn().mockResolvedValue([]),
-    };
+    const repository = createMockRepository(
+      async () => post,
+      async () => [],
+    );
 
-    const threads = await getPossibleThreads(post.id, {}, deps);
+    const threads = await getPossibleThreads(post.id, repository);
 
     expect(threads).toHaveLength(1);
     expect(threads[0]).toHaveLength(1);
@@ -89,29 +101,25 @@ describe("getPossibleThreads", () => {
       inReplyTo: "https://example.com/B",
     });
 
-    const deps: ThreadCollectorDeps = {
-      fetchPost: vi.fn().mockImplementation((id: PostId) => {
-        const posts: Record<string, Post> = {
-          "https://example.com/A": postA,
-          "https://example.com/B": postB,
-          "https://example.com/C": postC,
-        };
-        return Promise.resolve(posts[id.href] || null);
-      }),
-      fetchReplies: vi.fn().mockImplementation((post: Post) => {
-        const replies: Record<string, Post[]> = {
-          "https://example.com/A": [postB],
-          "https://example.com/B": [postC],
-          "https://example.com/C": [],
-        };
-        return Promise.resolve(replies[post.id.href] || []);
-      }),
+    const posts: Record<string, Post> = {
+      "https://example.com/A": postA,
+      "https://example.com/B": postB,
+      "https://example.com/C": postC,
     };
+    const replies: Record<string, Post[]> = {
+      "https://example.com/A": [postB],
+      "https://example.com/B": [postC],
+      "https://example.com/C": [],
+    };
+
+    const repository = createMockRepository(
+      async (id: PostId) => posts[id.href] || null,
+      async (post: Post) => replies[post.id.href] || [],
+    );
 
     const threads = await getPossibleThreads(
       createPostIdFromString("https://example.com/A"),
-      {},
-      deps,
+      repository,
     );
 
     expect(threads).toHaveLength(1);
@@ -136,15 +144,14 @@ describe("getPossibleThreads", () => {
       inReplyTo: "https://example.com/A",
     });
 
-    const deps: ThreadCollectorDeps = {
-      fetchPost: vi.fn().mockResolvedValue(postA),
-      fetchReplies: vi.fn().mockResolvedValue([postB]),
-    };
+    const repository = createMockRepository(
+      async () => postA,
+      async () => [postB],
+    );
 
     const threads = await getPossibleThreads(
       createPostIdFromString("https://example.com/A"),
-      {},
-      deps,
+      repository,
     );
 
     expect(threads).toHaveLength(1);
@@ -168,29 +175,25 @@ describe("getPossibleThreads", () => {
       inReplyTo: "https://example.com/A",
     });
 
-    const deps: ThreadCollectorDeps = {
-      fetchPost: vi.fn().mockImplementation((id: PostId) => {
-        const posts: Record<string, Post> = {
-          "https://example.com/A": postA,
-          "https://example.com/B": postB,
-          "https://example.com/C": postC,
-        };
-        return Promise.resolve(posts[id.href] || null);
-      }),
-      fetchReplies: vi.fn().mockImplementation((post: Post) => {
-        const replies: Record<string, Post[]> = {
-          "https://example.com/A": [postB, postC], // 두 개의 self-reply
-          "https://example.com/B": [],
-          "https://example.com/C": [],
-        };
-        return Promise.resolve(replies[post.id.href] || []);
-      }),
+    const posts: Record<string, Post> = {
+      "https://example.com/A": postA,
+      "https://example.com/B": postB,
+      "https://example.com/C": postC,
     };
+    const replies: Record<string, Post[]> = {
+      "https://example.com/A": [postB, postC],
+      "https://example.com/B": [],
+      "https://example.com/C": [],
+    };
+
+    const repository = createMockRepository(
+      async (id: PostId) => posts[id.href] || null,
+      async (post: Post) => replies[post.id.href] || [],
+    );
 
     const threads = await getPossibleThreads(
       createPostIdFromString("https://example.com/A"),
-      {},
-      deps,
+      repository,
     );
 
     expect(threads).toHaveLength(2);
@@ -205,15 +208,14 @@ describe("getPossibleThreads", () => {
   });
 
   it("포스트를 찾을 수 없으면 빈 배열 반환", async () => {
-    const deps: ThreadCollectorDeps = {
-      fetchPost: vi.fn().mockResolvedValue(null),
-      fetchReplies: vi.fn().mockResolvedValue([]),
-    };
+    const repository = createMockRepository(
+      async () => null,
+      async () => [],
+    );
 
     const threads = await getPossibleThreads(
       createPostIdFromString("https://example.com/nonexistent"),
-      {},
-      deps,
+      repository,
     );
 
     expect(threads).toHaveLength(0);
@@ -243,54 +245,50 @@ describe("getLongestThread", () => {
       inReplyTo: "https://example.com/A",
     });
 
-    const deps: ThreadCollectorDeps = {
-      fetchPost: vi.fn().mockImplementation((id: PostId) => {
-        const posts: Record<string, Post> = {
-          "https://example.com/A": postA,
-          "https://example.com/B": postB,
-          "https://example.com/C": postC,
-          "https://example.com/D": postD,
-        };
-        return Promise.resolve(posts[id.href] || null);
-      }),
-      fetchReplies: vi.fn().mockImplementation((post: Post) => {
-        const replies: Record<string, Post[]> = {
-          "https://example.com/A": [postB, postD], // 분기: B와 D 모두 self-reply
-          "https://example.com/B": [postC],
-          "https://example.com/C": [],
-          "https://example.com/D": [],
-        };
-        return Promise.resolve(replies[post.id.href] || []);
-      }),
+    const posts: Record<string, Post> = {
+      "https://example.com/A": postA,
+      "https://example.com/B": postB,
+      "https://example.com/C": postC,
+      "https://example.com/D": postD,
     };
+    const replies: Record<string, Post[]> = {
+      "https://example.com/A": [postB, postD],
+      "https://example.com/B": [postC],
+      "https://example.com/C": [],
+      "https://example.com/D": [],
+    };
+
+    const repository = createMockRepository(
+      async (id: PostId) => posts[id.href] || null,
+      async (post: Post) => replies[post.id.href] || [],
+    );
 
     const thread = await getLongestThread(
       createPostIdFromString("https://example.com/A"),
-      {},
-      deps,
+      repository,
     );
 
     // A -> B -> C (길이 3) vs A -> D (길이 2)
+    expect(thread).not.toBeNull();
     expect(thread).toHaveLength(3);
-    expect(thread.map((p) => p.id.href)).toEqual([
+    expect(thread!.map((p) => p.id.href)).toEqual([
       "https://example.com/A",
       "https://example.com/B",
       "https://example.com/C",
     ]);
   });
 
-  it("포스트를 찾을 수 없으면 빈 배열 반환", async () => {
-    const deps: ThreadCollectorDeps = {
-      fetchPost: vi.fn().mockResolvedValue(null),
-      fetchReplies: vi.fn().mockResolvedValue([]),
-    };
+  it("포스트를 찾을 수 없으면 null 반환", async () => {
+    const repository = createMockRepository(
+      async () => null,
+      async () => [],
+    );
 
     const thread = await getLongestThread(
       createPostIdFromString("https://example.com/nonexistent"),
-      {},
-      deps,
+      repository,
     );
 
-    expect(thread).toHaveLength(0);
+    expect(thread).toBeNull();
   });
 });

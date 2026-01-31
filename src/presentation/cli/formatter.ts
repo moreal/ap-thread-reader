@@ -1,4 +1,4 @@
-import type { Thread, Post } from "./types";
+import type { Post } from "@/domain/models";
 
 export interface FormatOptions {
   /** 포스트 사이 구분자 */
@@ -38,7 +38,7 @@ export function formatPost(post: Post, options: FormatOptions = {}): string {
 /**
  * 스레드를 문자열로 포맷팅합니다.
  */
-export function formatThread(thread: Thread, options: FormatOptions = {}): string {
+export function formatThread(thread: readonly Post[], options: FormatOptions = {}): string {
   if (thread.length === 0) {
     return "";
   }
@@ -51,7 +51,7 @@ export function formatThread(thread: Thread, options: FormatOptions = {}): strin
 /**
  * 스레드를 HTML로 포맷팅합니다 (프론트엔드용).
  */
-export function formatThreadAsHtml(thread: Thread): string {
+export function formatThreadAsHtml(thread: readonly Post[]): string {
   if (thread.length === 0) {
     return "";
   }

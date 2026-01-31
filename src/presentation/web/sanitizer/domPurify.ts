@@ -1,10 +1,10 @@
 import DOMPurify from "dompurify";
-import type { SanitizeHtmlFn, SanitizerOptions } from "@/domain/sanitizer";
+import type { SanitizeHtmlFn, SanitizerOptions } from "./types";
 import {
   DEFAULT_ALLOWED_TAGS,
   DEFAULT_ALLOWED_ATTRIBUTES,
   DEFAULT_FORBIDDEN_TAGS,
-} from "@/domain/sanitizer";
+} from "./types";
 import { sanitizerLogger } from "@/logging";
 
 /**

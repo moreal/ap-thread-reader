@@ -1,8 +1,8 @@
-import { getLongestThread } from "@/domain/thread";
-import { formatThread } from "@/domain/formatter";
-import { commonLookupObjectOptions, fetchPost, repliesFetcher } from "@/infra/activitypub";
+import { getLongestThread } from "@/domain/services";
+import { formatThread } from "./formatter";
+import { ActivityPubPostRepository } from "@/infra/ActivityPubPostRepository";
 import { setupLogging, cliLogger } from "@/logging";
-import { createPostIdFromString } from "@/domain/types";
+import { createPostIdFromString } from "@/domain/values";
 import { object, option, optional, argument } from "@optique/core/parser";
 import { string, url } from "@optique/core/valueparser";
 import { run } from "@optique/run";
@@ -30,13 +30,12 @@ export async function main(args: string[], options: CliOptions = {}): Promise<nu
 
   cliLogger.debug(`Fetching thread from: {url}`, { url });
 
-  try {
-    const thread = await getLongestThread(createPostIdFromString(url), commonLookupObjectOptions, {
-      fetchPost,
-      fetchReplies: repliesFetcher,
-    });
+  const repository = new ActivityPubPostRepository();
 
-    if (thread.length === 0) {
+  try {
+    const thread = await getLongestThread(createPostIdFromString(url), repository);
+
+    if (!thread) {
       cliLogger.error("No posts found in thread.");
       return 1;
     }

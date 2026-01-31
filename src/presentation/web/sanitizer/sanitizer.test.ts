@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { noopSanitizer } from "./sanitizer";
-import { createDOMPurifySanitizer, defaultSanitizer } from "@/infra/domPurifySanitizer";
+import { noopSanitizer } from "./types";
+import { createDOMPurifySanitizer, defaultSanitizer } from "./domPurify";
 
 describe("noopSanitizer", () => {
   it("입력을 그대로 반환해야 함", () => {

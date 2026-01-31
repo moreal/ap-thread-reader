@@ -1,4 +1,4 @@
-import type { SerializableThread } from "@/domain/types";
+import type { SerializableThread } from "@/application/dto";
 import { PostContent } from "./PostContent";
 
 export interface ThreadViewProps {

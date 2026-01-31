@@ -1,6 +1,6 @@
 import { createContext, useContext, type ReactNode } from "react";
-import type { SanitizeHtmlFn } from "@/domain/sanitizer";
-import { noopSanitizer } from "@/domain/sanitizer";
+import type { SanitizeHtmlFn } from "@/presentation/web/sanitizer";
+import { noopSanitizer } from "@/presentation/web/sanitizer";
 
 const SanitizerContext = createContext<SanitizeHtmlFn>(noopSanitizer);
 
@@ -19,6 +19,6 @@ export function SanitizerProvider({ sanitizer, children }: SanitizerProviderProp
 /**
  * Sanitizer를 사용하는 Hook
  */
-export function useSanitizer(): SanitizeHtmlFn {
+export function useSanitizerContext(): SanitizeHtmlFn {
   return useContext(SanitizerContext);
 }

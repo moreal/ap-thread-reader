@@ -1,5 +1,5 @@
-import type { SerializablePost } from "@/domain/types";
-import { useSanitizer } from "@/hooks/useSanitizer";
+import type { SerializablePost } from "@/application/dto";
+import { useSanitizer } from "@/presentation/web/hooks/useSanitizer";
 
 export interface PostContentProps {
   post: SerializablePost;

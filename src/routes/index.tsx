@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, type HistoryState } from "@tanstack/react
 import { useState, type FormEvent } from "react";
 import { Trans } from "@lingui/react";
 import { t } from "@lingui/macro";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { LocaleSwitcher } from "@/presentation/web/components/LocaleSwitcher";
 
 interface NavigationState extends HistoryState {
   fromIndex?: boolean;

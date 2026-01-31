@@ -1,49 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { isValidPostUrl } from "./activitypub";
-import { createPostIdFromString } from "@/domain/types";
+import { createPostIdFromString } from "@/domain/values";
 
-describe("isValidPostUrl", () => {
-  it("유효한 HTTPS URL을 허용해야 함", () => {
-    expect(isValidPostUrl("https://mastodon.social/@user/12345")).toBe(true);
-  });
+function createCompleteMockPost(overrides: Record<string, unknown> = {}) {
+  return {
+    id: { href: "https://example.com/post/1" },
+    attributionId: { href: "https://example.com/user/1" },
+    content: { toString: () => "<p>Post content</p>" },
+    published: { toString: () => "2024-01-01T00:00:00Z" },
+    replyTargetId: null,
+    url: new URL("https://example.com/post/1"),
+    getAttribution: async () => null,
+    getReplies: async () => null,
+    ...overrides,
+  };
+}
 
-  it("유효한 HTTP URL을 허용해야 함", () => {
-    expect(isValidPostUrl("http://example.com/posts/1")).toBe(true);
-  });
-
-  it("잘못된 URL을 거부해야 함", () => {
-    expect(isValidPostUrl("not-a-url")).toBe(false);
-  });
-
-  it("빈 문자열을 거부해야 함", () => {
-    expect(isValidPostUrl("")).toBe(false);
-  });
-
-  it("file:// 프로토콜을 거부해야 함", () => {
-    expect(isValidPostUrl("file:///etc/passwd")).toBe(false);
-  });
-
-  it("javascript: 프로토콜을 거부해야 함", () => {
-    expect(isValidPostUrl("javascript:alert(1)")).toBe(false);
-  });
-
-  it("ftp:// 프로토콜을 거부해야 함", () => {
-    expect(isValidPostUrl("ftp://example.com/file")).toBe(false);
-  });
-
-  it("쿼리 파라미터가 있는 URL을 허용해야 함", () => {
-    expect(isValidPostUrl("https://example.com/posts/1?format=json")).toBe(true);
-  });
-});
-
-// fetchReplies 테스트는 Fedify 모듈을 모킹하여 수행
-describe("fetchReplies", () => {
+describe("ActivityPubPostRepository", () => {
   beforeEach(() => {
     vi.resetModules();
   });
 
-  it("인라인 아이템이 있는 replies collection을 처리해야 함", async () => {
-    // Mock Note 클래스와 인라인 아이템을 가진 collection
+  it("replies collection의 첫 페이지에서 답글을 가져와야 함", async () => {
     const mockReplyNote = {
       id: { href: "https://example.com/reply/1" },
       attributionId: { href: "https://example.com/user/1" },
@@ -51,24 +28,25 @@ describe("fetchReplies", () => {
       published: { toString: () => "2024-01-01T00:00:00Z" },
       replyTargetId: { href: "https://example.com/post/1" },
       url: new URL("https://example.com/reply/1"),
+      getAttribution: async () => null,
+    };
+
+    const mockFirstPage = {
+      getItems: async function* () {
+        yield mockReplyNote;
+      },
+      nextId: null,
     };
 
     const mockRepliesCollection = {
       id: { href: "https://example.com/post/1#replies" },
-      // getItems()가 직접 아이템을 반환 (인라인)
-      getItems: async function* () {
-        yield mockReplyNote;
-      },
-      // getFirst()는 null 반환 (페이지네이션 없음)
-      getFirst: async () => null,
+      getFirst: async () => mockFirstPage,
     };
 
-    const mockPost = {
-      id: { href: "https://example.com/post/1" },
+    const mockPost = createCompleteMockPost({
       getReplies: async () => mockRepliesCollection,
-    };
+    });
 
-    // Fedify 모듈 모킹
     vi.doMock("@fedify/fedify", async (importOriginal) => {
       const original = await importOriginal<typeof import("@fedify/fedify")>();
       return {
@@ -88,12 +66,17 @@ describe("fetchReplies", () => {
       };
     });
 
-    const { fetchReplies } = await import("./activitypub");
-    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"), {});
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(createPostIdFromString("https://example.com/post/1"));
 
-    expect(replies).toHaveLength(1);
-    expect(replies[0].id.href).toBe("https://example.com/reply/1");
-    expect(replies[0].content).toBe("<p>Reply content</p>");
+    expect(post).not.toBeNull();
+    if (post) {
+      const replies = await repository.findReplies(post);
+      expect(replies).toHaveLength(1);
+      expect(replies[0].id.href).toBe("https://example.com/reply/1");
+      expect(replies[0].content).toBe("<p>Reply content</p>");
+    }
   });
 
   it("페이지네이션된 replies collection을 처리해야 함", async () => {
@@ -104,29 +87,25 @@ describe("fetchReplies", () => {
       published: { toString: () => "2024-01-01T00:00:00Z" },
       replyTargetId: { href: "https://example.com/post/1" },
       url: new URL("https://example.com/reply/1"),
+      getAttribution: async () => null,
     };
 
     const mockFirstPage = {
       getItems: async function* () {
         yield mockReplyNote;
       },
-      nextId: null, // 다음 페이지 없음
+      nextId: null,
     };
 
     const mockRepliesCollection = {
       id: { href: "https://example.com/post/1#replies" },
-      // getItems()는 빈 결과 (인라인 아이템 없음)
-      getItems: async function* () {
-        // 아무것도 yield하지 않음
-      },
-      // getFirst()가 페이지 반환
+      getItems: async function* () {},
       getFirst: async () => mockFirstPage,
     };
 
-    const mockPost = {
-      id: { href: "https://example.com/post/1" },
+    const mockPost = createCompleteMockPost({
       getReplies: async () => mockRepliesCollection,
-    };
+    });
 
     vi.doMock("@fedify/fedify", async (importOriginal) => {
       const original = await importOriginal<typeof import("@fedify/fedify")>();
@@ -147,18 +126,22 @@ describe("fetchReplies", () => {
       };
     });
 
-    const { fetchReplies } = await import("./activitypub");
-    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"), {});
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(createPostIdFromString("https://example.com/post/1"));
 
-    expect(replies).toHaveLength(1);
-    expect(replies[0].content).toBe("<p>Paginated reply</p>");
+    expect(post).not.toBeNull();
+    if (post) {
+      const replies = await repository.findReplies(post);
+      expect(replies).toHaveLength(1);
+      expect(replies[0].content).toBe("<p>Paginated reply</p>");
+    }
   });
 
   it("replies collection이 없으면 빈 배열을 반환해야 함", async () => {
-    const mockPost = {
-      id: { href: "https://example.com/post/1" },
+    const mockPost = createCompleteMockPost({
       getReplies: async () => null,
-    };
+    });
 
     vi.doMock("@fedify/fedify", async (importOriginal) => {
       const original = await importOriginal<typeof import("@fedify/fedify")>();
@@ -179,25 +162,27 @@ describe("fetchReplies", () => {
       };
     });
 
-    const { fetchReplies } = await import("./activitypub");
-    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"), {});
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(createPostIdFromString("https://example.com/post/1"));
 
-    expect(replies).toHaveLength(0);
+    expect(post).not.toBeNull();
+    if (post) {
+      const replies = await repository.findReplies(post);
+      expect(replies).toHaveLength(0);
+    }
   });
 
   it("인라인과 페이지네이션 모두 비어있으면 빈 배열을 반환해야 함", async () => {
     const mockRepliesCollection = {
       id: { href: "https://example.com/post/1#replies" },
-      getItems: async function* () {
-        // 빈 인라인
-      },
-      getFirst: async () => null, // 페이지네이션도 없음
+      getItems: async function* () {},
+      getFirst: async () => null,
     };
 
-    const mockPost = {
-      id: { href: "https://example.com/post/1" },
+    const mockPost = createCompleteMockPost({
       getReplies: async () => mockRepliesCollection,
-    };
+    });
 
     vi.doMock("@fedify/fedify", async (importOriginal) => {
       const original = await importOriginal<typeof import("@fedify/fedify")>();
@@ -218,9 +203,14 @@ describe("fetchReplies", () => {
       };
     });
 
-    const { fetchReplies } = await import("./activitypub");
-    const replies = await fetchReplies(createPostIdFromString("https://example.com/post/1"), {});
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(createPostIdFromString("https://example.com/post/1"));
 
-    expect(replies).toHaveLength(0);
+    expect(post).not.toBeNull();
+    if (post) {
+      const replies = await repository.findReplies(post);
+      expect(replies).toHaveLength(0);
+    }
   });
 });

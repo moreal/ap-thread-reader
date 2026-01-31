@@ -1,7 +1,7 @@
-import { LookupObjectOptions } from "@fedify/fedify";
-import type { Post, PostId, Thread, ThreadCollectorDeps } from "./types";
-
-export type { ThreadCollectorDeps };
+import type { Post } from "../models";
+import { type Thread, createThread } from "../models";
+import type { PostId } from "../values";
+import type { PostRepository } from "../ports";
 
 /**
  * 답글 목록에서 특정 작성자의 self-reply만 필터링합니다.
@@ -14,7 +14,7 @@ export function filterSelfReplies(replies: Post[], authorId: string): Post[] {
  * 주어진 포스트에서 시작하는 가능한 self-reply 스레드들을 수집합니다.
  *
  * @param startPostId - 시작 포스트의 ID
- * @param deps - 의존성 (fetchPost, fetchReplies)
+ * @param repository - 포스트 저장소
  * @returns 가능한 스레드들의 배열 (분기가 있을 경우 여러 개)
  *
  * @example
@@ -30,10 +30,9 @@ export function filterSelfReplies(replies: Post[], authorId: string): Post[] {
  */
 export async function getPossibleThreads(
   startPostId: PostId,
-  options: LookupObjectOptions,
-  deps: ThreadCollectorDeps,
+  repository: PostRepository,
 ): Promise<Thread[]> {
-  const startPost = await deps.fetchPost(startPostId, {});
+  const startPost = await repository.findById(startPostId);
   if (!startPost) {
     return [];
   }
@@ -44,7 +43,7 @@ export async function getPossibleThreads(
   // 큐 기반 파이프라이닝: 다음 레벨 fetch를 즉시 시작
   interface QueueItem {
     post: Post;
-    thread: Thread;
+    thread: Post[];
     repliesPromise: Promise<Post[]>;
   }
 
@@ -53,7 +52,7 @@ export async function getPossibleThreads(
     {
       post: startPost,
       thread: [startPost],
-      repliesPromise: deps.fetchReplies(startPost, options, authorId),
+      repliesPromise: repository.findReplies(startPost, authorId),
     },
   ];
 
@@ -67,14 +66,14 @@ export async function getPossibleThreads(
         const selfReplies = filterSelfReplies(replies, authorId);
 
         if (selfReplies.length === 0) {
-          threads.push(item.thread);
+          threads.push(createThread(item.thread));
         } else {
           for (const reply of selfReplies) {
             // 다음 레벨 fetch를 즉시 시작 (파이프라이닝)
             nextQueue.push({
               post: reply,
               thread: [...item.thread, reply],
-              repliesPromise: deps.fetchReplies(reply, options, authorId),
+              repliesPromise: repository.findReplies(reply, authorId),
             });
           }
         }
@@ -93,13 +92,12 @@ export async function getPossibleThreads(
  */
 export async function getLongestThread(
   startPostId: PostId,
-  options: LookupObjectOptions,
-  deps: ThreadCollectorDeps,
-): Promise<Thread> {
-  const threads = await getPossibleThreads(startPostId, options, deps);
+  repository: PostRepository,
+): Promise<Thread | null> {
+  const threads = await getPossibleThreads(startPostId, repository);
 
   if (threads.length === 0) {
-    return [];
+    return null;
   }
 
   // 가장 긴 스레드 반환

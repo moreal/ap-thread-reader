@@ -1,16 +1,17 @@
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { Trans } from "@lingui/react";
 import { useEffect, useState } from "react";
-import { ThreadView } from "@/components/ThreadView";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
-import { fetchThreadData, type ThreadResult } from "@/lib/api.functions";
+import { ThreadView } from "@/presentation/web/components/ThreadView";
+import { LocaleSwitcher } from "@/presentation/web/components/LocaleSwitcher";
+import { fetchThreadData } from "@/lib/api.functions";
+import type { ReadThreadResult } from "@/application/ReadThread";
 
 interface ReadSearchParams {
   url: string;
   ssr?: boolean;
 }
 
-interface LoaderResult extends ThreadResult {
+interface LoaderResult extends ReadThreadResult {
   /** When true, data should be fetched on the client */
   pending?: boolean;
   url: string;
@@ -75,7 +76,7 @@ function ReadPage() {
   const loaderData = Route.useLoaderData();
   const location = useLocation();
   const fromIndex = (location.state as { fromIndex?: boolean })?.fromIndex;
-  const [data, setData] = useState<ThreadResult>({
+  const [data, setData] = useState<ReadThreadResult>({
     thread: loaderData.thread,
     error: loaderData.error,
   });
