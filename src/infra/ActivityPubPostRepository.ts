@@ -58,9 +58,49 @@ export class ActivityPubPostRepository implements PostRepository {
   private apObjectCache = new Map<string, Note | Article>();
 
   /**
+   * LanguageString 배열에서 특정 언어의 content를 추출합니다.
+   * 지정된 언어가 없으면 첫 번째 항목을 반환합니다.
+   */
+  private extractLanguageContent(
+    contentValue: unknown,
+    contentsArray: unknown[],
+    language?: string,
+  ): string {
+    // contents 배열이 있는 경우
+    if (contentsArray && contentsArray.length > 0) {
+      // 언어가 지정된 경우, 해당 언어의 content 찾기
+      if (language) {
+        const languageContent = contentsArray.find((c) => {
+          if (!c || typeof c !== "object") return false;
+          if (!("language" in c)) return false;
+          const lang = (c as { language: unknown }).language;
+          if (!lang || typeof lang !== "object") return false;
+          if (!("compact" in lang)) return false;
+          const compact = (lang as { compact: unknown }).compact;
+          if (typeof compact !== "function") return false;
+          return compact() === language;
+        });
+        if (languageContent && typeof languageContent === "object" && "toString" in languageContent) {
+          return String(languageContent.toString());
+        }
+      }
+      // 언어를 찾지 못했거나 지정되지 않은 경우, 첫 번째 항목 반환
+      const firstContent = contentsArray[0];
+      if (firstContent && typeof firstContent === "object" && "toString" in firstContent) {
+        return String(firstContent.toString());
+      }
+    }
+    // contents 배열이 없으면 단일 content 사용
+    if (contentValue && typeof contentValue === "object" && "toString" in contentValue) {
+      return String(contentValue.toString());
+    }
+    return "";
+  }
+
+  /**
    * Fedify Object를 도메인 Post로 변환합니다.
    */
-  private async toPost(obj: APObject): Promise<Post | null> {
+  private async toPost(obj: APObject, language?: string): Promise<Post | null> {
     if (!(obj instanceof Note) && !(obj instanceof Article)) {
       activitypubLogger.warn`Object is not a Note or Article: ${obj.constructor.name}`;
       return null;
@@ -103,13 +143,13 @@ export class ActivityPubPostRepository implements PostRepository {
       }
     }
 
-    const content = obj.content?.toString() ?? "";
+    const content = this.extractLanguageContent(obj.content, obj.contents, language);
     const published = obj.published;
     const publishedAt = published?.toString() ?? new Date().toISOString();
     const inReplyTo = obj.replyTargetId ? createPostId(obj.replyTargetId) : null;
     const objUrl = obj.url;
     const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
-    const summary = obj.summary?.toString() ?? null;
+    const summary = this.extractLanguageContent(obj.summary, obj.summaries, language) || null;
 
     // apObjectCache에 저장 (_apObjectRef 대체)
     this.apObjectCache.set(id.href, obj);
@@ -126,7 +166,7 @@ export class ActivityPubPostRepository implements PostRepository {
     };
   }
 
-  async findById(postId: PostId): Promise<Post | null> {
+  async findById(postId: PostId, language?: string): Promise<Post | null> {
     activitypubLogger.debug`Fetching post: ${postId.toString()}`;
 
     try {
@@ -141,7 +181,7 @@ export class ActivityPubPostRepository implements PostRepository {
         return null;
       }
 
-      const post = await this.toPost(obj as APObject);
+      const post = await this.toPost(obj as APObject, language);
       if (post) {
         activitypubLogger.debug`Successfully fetched post: ${postId.toString()}`;
       }
@@ -158,6 +198,7 @@ export class ActivityPubPostRepository implements PostRepository {
   private async fetchRepliesFromObject(
     obj: Note | Article,
     authorFilter?: string,
+    language?: string,
   ): Promise<Post[]> {
     const postId = obj.id?.href ?? "unknown";
 
@@ -194,7 +235,7 @@ export class ActivityPubPostRepository implements PostRepository {
         }
       }
       // 병렬로 toPost 변환
-      const results = await Promise.all(pageItems.map((item) => this.toPost(item)));
+      const results = await Promise.all(pageItems.map((item) => this.toPost(item, language)));
       for (const post of results) {
         if (post) {
           posts.push(post);
@@ -207,7 +248,7 @@ export class ActivityPubPostRepository implements PostRepository {
     return posts;
   }
 
-  async findReplies(post: Post, authorFilter?: string): Promise<Post[]> {
+  async findReplies(post: Post, authorFilter?: string, language?: string): Promise<Post[]> {
     activitypubLogger.debug`Fetching replies for: ${post.id.toString()}`;
 
     try {
@@ -227,7 +268,7 @@ export class ActivityPubPostRepository implements PostRepository {
         obj = looked;
       }
 
-      return await this.fetchRepliesFromObject(obj, authorFilter);
+      return await this.fetchRepliesFromObject(obj, authorFilter, language);
     } catch (error) {
       activitypubLogger.error`Failed to fetch replies for ${post.id.toString()}: ${error}`;
       return [];
