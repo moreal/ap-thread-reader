@@ -37,6 +37,22 @@ export const Route = createFileRoute("/read")({
     // Otherwise, return pending state for client-side fetch
     return { thread: null, error: null, pending: true, url: deps.url };
   },
+  head: ({ loaderData }) => {
+    const meta: Array<{ name: string; content: string }> = [];
+    
+    // Add description meta tag from thread summary if available
+    if (loaderData?.thread && loaderData.thread.length > 0) {
+      const firstPost = loaderData.thread[0];
+      if (firstPost.summary) {
+        meta.push({
+          name: "description",
+          content: firstPost.summary,
+        });
+      }
+    }
+    
+    return { meta };
+  },
   pendingComponent: LoadingPage,
   component: ReadPage,
 });

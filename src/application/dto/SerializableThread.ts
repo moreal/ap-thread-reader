@@ -14,6 +14,7 @@ export interface SerializablePost {
   publishedAt: string;
   inReplyTo: string | null;
   url: string | null;
+  summary: string | null;
 }
 
 /**
@@ -33,6 +34,7 @@ export function toSerializablePost(post: Post): SerializablePost {
     publishedAt: post.publishedAt,
     inReplyTo: post.inReplyTo?.href ?? null,
     url: post.url,
+    summary: post.summary,
   };
 }
 
@@ -55,6 +57,7 @@ export function fromSerializablePost(post: SerializablePost): Post {
     publishedAt: post.publishedAt,
     inReplyTo: post.inReplyTo ? createPostIdFromString(post.inReplyTo) : null,
     url: post.url,
+    summary: post.summary,
   };
 }
 

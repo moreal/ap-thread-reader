@@ -109,6 +109,7 @@ export class ActivityPubPostRepository implements PostRepository {
     const inReplyTo = obj.replyTargetId ? createPostId(obj.replyTargetId) : null;
     const objUrl = obj.url;
     const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
+    const summary = obj.summary?.toString() ?? null;
 
     // apObjectCache에 저장 (_apObjectRef 대체)
     this.apObjectCache.set(id.href, obj);
@@ -121,6 +122,7 @@ export class ActivityPubPostRepository implements PostRepository {
       publishedAt,
       inReplyTo,
       url,
+      summary,
     };
   }
 

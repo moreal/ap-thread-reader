@@ -18,6 +18,7 @@ function createMockPost(overrides: MockPostOverrides = {}): Post {
     publishedAt: "2024-01-01T00:00:00Z",
     inReplyTo: null,
     url: "https://example.com/@alice/1",
+    summary: null,
   };
 }
 
