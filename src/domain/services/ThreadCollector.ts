@@ -15,6 +15,7 @@ export function filterSelfReplies(replies: Post[], authorId: string): Post[] {
  *
  * @param startPostId - 시작 포스트의 ID
  * @param repository - 포스트 저장소
+ * @param language - 선택적 언어 코드 (예: 'en', 'ja', 'ko')
  * @returns 가능한 스레드들의 배열 (분기가 있을 경우 여러 개)
  *
  * @example
@@ -31,8 +32,9 @@ export function filterSelfReplies(replies: Post[], authorId: string): Post[] {
 export async function getPossibleThreads(
   startPostId: PostId,
   repository: PostRepository,
+  language?: string,
 ): Promise<Thread[]> {
-  const startPost = await repository.findById(startPostId);
+  const startPost = await repository.findById(startPostId, language);
   if (!startPost) {
     return [];
   }
@@ -52,7 +54,7 @@ export async function getPossibleThreads(
     {
       post: startPost,
       thread: [startPost],
-      repliesPromise: repository.findReplies(startPost, authorId),
+      repliesPromise: repository.findReplies(startPost, authorId, language),
     },
   ];
 
@@ -73,7 +75,7 @@ export async function getPossibleThreads(
             nextQueue.push({
               post: reply,
               thread: [...item.thread, reply],
-              repliesPromise: repository.findReplies(reply, authorId),
+              repliesPromise: repository.findReplies(reply, authorId, language),
             });
           }
         }
@@ -93,8 +95,9 @@ export async function getPossibleThreads(
 export async function getLongestThread(
   startPostId: PostId,
   repository: PostRepository,
+  language?: string,
 ): Promise<Thread | null> {
-  const threads = await getPossibleThreads(startPostId, repository);
+  const threads = await getPossibleThreads(startPostId, repository, language);
 
   if (threads.length === 0) {
     return null;

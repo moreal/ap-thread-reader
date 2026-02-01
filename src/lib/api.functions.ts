@@ -6,6 +6,13 @@ const repository = new ActivityPubPostRepository();
 
 export type { ReadThreadResult };
 
+interface FetchThreadInput {
+  url: string;
+  language?: string;
+}
+
 export const fetchThreadData = createServerFn({ method: "GET" })
-  .inputValidator((url: string) => url)
-  .handler(({ data: url }): Promise<ReadThreadResult> => readThread(url, repository));
+  .inputValidator((input: FetchThreadInput) => input)
+  .handler(({ data }): Promise<ReadThreadResult> => {
+    return readThread(data.url, repository, data.language);
+  });

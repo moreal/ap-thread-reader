@@ -12,7 +12,11 @@ export interface ReadThreadResult {
  * 스레드 읽기 유스케이스
  * URL을 받아 스레드를 조회하고 직렬화된 결과를 반환합니다.
  */
-export async function readThread(url: string, repository: PostRepository): Promise<ReadThreadResult> {
+export async function readThread(
+  url: string,
+  repository: PostRepository,
+  language?: string,
+): Promise<ReadThreadResult> {
   if (!url || !isValidPostUrl(url)) {
     return { thread: null, error: "Invalid URL" };
   }
@@ -23,7 +27,7 @@ export async function readThread(url: string, repository: PostRepository): Promi
   }
 
   try {
-    const thread = await getLongestThread(postId, repository);
+    const thread = await getLongestThread(postId, repository, language);
 
     if (!thread) {
       return { thread: null, error: "No posts found in thread" };
