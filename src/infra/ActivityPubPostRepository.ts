@@ -68,10 +68,9 @@ function extractLanguageContent(
         // LanguageString인 경우에만 language 속성이 있음
         if (typeof c !== "object" || !c || !("language" in c)) return false;
         const lang = c.language;
-        if (!lang || typeof lang !== "object" || !("compact" in lang)) return false;
-        const compact = lang.compact;
-        if (typeof compact !== "function") return false;
-        return compact() === language;
+        if (!lang) return false;
+        // LanguageTag의 toString()을 사용하여 언어 코드 비교
+        return String(lang) === language;
       });
       if (languageContent) {
         return String(languageContent.toString());

@@ -282,9 +282,9 @@ describe("ActivityPubPostRepository", () => {
     const mockPost = createCompleteMockPost({
       content: null,
       contents: [
-        { toString: () => "<p>Hello</p>", language: { compact: () => "en" } },
-        { toString: () => "<p>こんにちは</p>", language: { compact: () => "ja" } },
-        { toString: () => "<p>안녕하세요</p>", language: { compact: () => "ko" } },
+        { toString: () => "<p>Hello</p>", language: { toString: () => "en", compact: () => "en" } },
+        { toString: () => "<p>こんにちは</p>", language: { toString: () => "ja", compact: () => "ja" } },
+        { toString: () => "<p>안녕하세요</p>", language: { toString: () => "ko", compact: () => "ko" } },
       ],
     });
 
@@ -331,8 +331,8 @@ describe("ActivityPubPostRepository", () => {
     const mockPost = createCompleteMockPost({
       content: null,
       contents: [
-        { toString: () => "<p>Hello</p>", language: { compact: () => "en" } },
-        { toString: () => "<p>こんにちは</p>", language: { compact: () => "ja" } },
+        { toString: () => "<p>Hello</p>", language: { toString: () => "en", compact: () => "en" } },
+        { toString: () => "<p>こんにちは</p>", language: { toString: () => "ja", compact: () => "ja" } },
       ],
     });
 
@@ -367,8 +367,8 @@ describe("ActivityPubPostRepository", () => {
     const mockPost = createCompleteMockPost({
       content: null,
       contents: [
-        { toString: () => "<p>Hello</p>", language: { compact: () => "en" } },
-        { toString: () => "<p>こんにちは</p>", language: { compact: () => "ja" } },
+        { toString: () => "<p>Hello</p>", language: { toString: () => "en", compact: () => "en" } },
+        { toString: () => "<p>こんにちは</p>", language: { toString: () => "ja", compact: () => "ja" } },
       ],
     });
 
@@ -406,8 +406,8 @@ describe("ActivityPubPostRepository", () => {
     const mockPost = createCompleteMockPost({
       summary: null,
       summaries: [
-        { toString: () => "Summary in English", language: { compact: () => "en" } },
-        { toString: () => "日本語の要約", language: { compact: () => "ja" } },
+        { toString: () => "Summary in English", language: { toString: () => "en", compact: () => "en" } },
+        { toString: () => "日本語の要約", language: { toString: () => "ja", compact: () => "ja" } },
       ],
     });
 
