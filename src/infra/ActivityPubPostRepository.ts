@@ -59,6 +59,7 @@ function extractLanguageContent(
   contentValue: Note["content"] | Article["content"],
   contentsArray: Note["contents"] | Article["contents"],
   language?: string,
+  allowEmpty = false,
 ): string {
   // contents 배열이 있는 경우
   if (contentsArray && contentsArray.length > 0) {
@@ -85,6 +86,11 @@ function extractLanguageContent(
   // contents 배열이 없으면 단일 content 사용
   if (contentValue) {
     return String(contentValue.toString());
+  }
+  // 정상적인 Note/Article에서는 도달할 수 없는 경로
+  if (!allowEmpty) {
+    activitypubLogger.error`No content or contents found in ActivityPub object`;
+    throw new Error("No content or contents found in ActivityPub object");
   }
   return "";
 }
@@ -147,7 +153,7 @@ export class ActivityPubPostRepository implements PostRepository {
     const inReplyTo = obj.replyTargetId ? createPostId(obj.replyTargetId) : null;
     const objUrl = obj.url;
     const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
-    const summary = extractLanguageContent(obj.summary, obj.summaries, language) || null;
+    const summary = extractLanguageContent(obj.summary, obj.summaries, language, true) || null;
 
     // apObjectCache에 저장 (_apObjectRef 대체)
     this.apObjectCache.set(id.href, obj);
