@@ -52,49 +52,49 @@ const commonLookupObjectOptions: LookupObjectOptions = {
 };
 
 /**
+ * LanguageString 배열에서 특정 언어의 content를 추출합니다.
+ * 지정된 언어가 없으면 첫 번째 항목을 반환합니다.
+ */
+function extractLanguageContent(
+  contentValue: Note["content"] | Article["content"],
+  contentsArray: Note["contents"] | Article["contents"],
+  language?: string,
+): string {
+  // contents 배열이 있는 경우
+  if (contentsArray && contentsArray.length > 0) {
+    // 언어가 지정된 경우, 해당 언어의 content 찾기
+    if (language) {
+      const languageContent = contentsArray.find((c) => {
+        // LanguageString인 경우에만 language 속성이 있음
+        if (typeof c !== "object" || !c || !("language" in c)) return false;
+        const lang = c.language;
+        if (!lang || typeof lang !== "object" || !("compact" in lang)) return false;
+        const compact = lang.compact;
+        if (typeof compact !== "function") return false;
+        return compact() === language;
+      });
+      if (languageContent) {
+        return String(languageContent.toString());
+      }
+    }
+    // 언어를 찾지 못했거나 지정되지 않은 경우, 첫 번째 항목 반환
+    const firstContent = contentsArray[0];
+    if (firstContent) {
+      return String(firstContent.toString());
+    }
+  }
+  // contents 배열이 없으면 단일 content 사용
+  if (contentValue) {
+    return String(contentValue.toString());
+  }
+  return "";
+}
+
+/**
  * ActivityPub 기반 PostRepository 구현
  */
 export class ActivityPubPostRepository implements PostRepository {
   private apObjectCache = new Map<string, Note | Article>();
-
-  /**
-   * LanguageString 배열에서 특정 언어의 content를 추출합니다.
-   * 지정된 언어가 없으면 첫 번째 항목을 반환합니다.
-   */
-  private extractLanguageContent(
-    contentValue: Note["content"] | Article["content"],
-    contentsArray: Note["contents"] | Article["contents"],
-    language?: string,
-  ): string {
-    // contents 배열이 있는 경우
-    if (contentsArray && contentsArray.length > 0) {
-      // 언어가 지정된 경우, 해당 언어의 content 찾기
-      if (language) {
-        const languageContent = contentsArray.find((c) => {
-          // LanguageString인 경우에만 language 속성이 있음
-          if (typeof c !== "object" || !c || !("language" in c)) return false;
-          const lang = c.language;
-          if (!lang || typeof lang !== "object" || !("compact" in lang)) return false;
-          const compact = lang.compact;
-          if (typeof compact !== "function") return false;
-          return compact() === language;
-        });
-        if (languageContent) {
-          return String(languageContent.toString());
-        }
-      }
-      // 언어를 찾지 못했거나 지정되지 않은 경우, 첫 번째 항목 반환
-      const firstContent = contentsArray[0];
-      if (firstContent) {
-        return String(firstContent.toString());
-      }
-    }
-    // contents 배열이 없으면 단일 content 사용
-    if (contentValue) {
-      return String(contentValue.toString());
-    }
-    return "";
-  }
 
   /**
    * Fedify Object를 도메인 Post로 변환합니다.
@@ -142,13 +142,13 @@ export class ActivityPubPostRepository implements PostRepository {
       }
     }
 
-    const content = this.extractLanguageContent(obj.content, obj.contents, language);
+    const content = extractLanguageContent(obj.content, obj.contents, language);
     const published = obj.published;
     const publishedAt = published?.toString() ?? new Date().toISOString();
     const inReplyTo = obj.replyTargetId ? createPostId(obj.replyTargetId) : null;
     const objUrl = obj.url;
     const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
-    const summary = this.extractLanguageContent(obj.summary, obj.summaries, language) || null;
+    const summary = extractLanguageContent(obj.summary, obj.summaries, language) || null;
 
     // apObjectCache에 저장 (_apObjectRef 대체)
     this.apObjectCache.set(id.href, obj);
