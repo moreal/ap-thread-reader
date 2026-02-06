@@ -1,0 +1,21 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "Note",
+  "id": "http://localhost:4321/users/alice/posts/2",
+  "attributedTo": "http://localhost:4321/users/alice",
+  "content": "<p>This is the second post, a self-reply continuing the thread.</p>",
+  "published": "2024-01-01T10:05:00Z",
+  "url": "http://localhost:4321/users/alice/posts/2",
+  "inReplyTo": "http://localhost:4321/users/alice/posts/1",
+  "summary": null,
+  "replies": {
+    "type": "Collection",
+    "id": "http://localhost:4321/users/alice/posts/2#replies",
+    "first": {
+      "type": "CollectionPage",
+      "items": [
+        "http://localhost:4321/users/alice/posts/3"
+      ]
+    }
+  }
+}

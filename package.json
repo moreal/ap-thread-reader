@@ -11,6 +11,7 @@
     "start": "node .output/server/index.mjs",
     "deploy": "yarn build && flyctl deploy",
     "cli": "tsx scripts/cli.ts",
+    "fixture-server": "tsx scripts/fixture-server.ts",
     "fmt": "oxfmt",
     "test": "vitest run",
     "test:watch": "vitest",

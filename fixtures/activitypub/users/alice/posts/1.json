@@ -1,0 +1,21 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "Note",
+  "id": "http://localhost:4321/users/alice/posts/1",
+  "attributedTo": "http://localhost:4321/users/alice",
+  "content": "<p>This is the first post in a thread by Alice.</p>",
+  "published": "2024-01-01T10:00:00Z",
+  "url": "http://localhost:4321/users/alice/posts/1",
+  "inReplyTo": null,
+  "summary": null,
+  "replies": {
+    "type": "Collection",
+    "id": "http://localhost:4321/users/alice/posts/1#replies",
+    "first": {
+      "type": "CollectionPage",
+      "items": [
+        "http://localhost:4321/users/alice/posts/2"
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "Person",
+  "id": "http://localhost:4321/users/alice",
+  "preferredUsername": "alice",
+  "name": "Alice",
+  "url": "http://localhost:4321/@alice",
+  "inbox": "http://localhost:4321/users/alice/inbox",
+  "outbox": "http://localhost:4321/users/alice/outbox"
+}
