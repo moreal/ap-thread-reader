@@ -4,6 +4,11 @@
   "id": "http://localhost:4321/users/alice/posts/1",
   "attributedTo": "http://localhost:4321/users/alice",
   "content": "<p>This is the first post in a thread by Alice.</p>",
+  "contentMap": {
+    "en": "<p>This is the first post in a thread by Alice.</p>",
+    "ja": "<p>これはAliceによるスレッドの最初の投稿です。</p>",
+    "ko": "<p>이것은 Alice의 스레드 첫 번째 게시물입니다.</p>"
+  },
   "published": "2024-01-01T10:00:00Z",
   "url": "http://localhost:4321/users/alice/posts/1",
   "inReplyTo": null,
@@ -13,9 +18,7 @@
     "id": "http://localhost:4321/users/alice/posts/1#replies",
     "first": {
       "type": "CollectionPage",
-      "items": [
-        "http://localhost:4321/users/alice/posts/2"
-      ]
+      "items": ["http://localhost:4321/users/alice/posts/2"]
     }
   }
 }

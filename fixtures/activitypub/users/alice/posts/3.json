@@ -4,6 +4,11 @@
   "id": "http://localhost:4321/users/alice/posts/3",
   "attributedTo": "http://localhost:4321/users/alice",
   "content": "<p>This is the third and final post in the thread. That's all!</p>",
+  "contentMap": {
+    "en": "<p>This is the third and final post in the thread. That's all!</p>",
+    "ja": "<p>これはスレッドの3番目で最後の投稿です。以上です！</p>",
+    "ko": "<p>이것은 스레드의 세 번째이자 마지막 게시물입니다. 이상입니다!</p>"
+  },
   "published": "2024-01-01T10:10:00Z",
   "url": "http://localhost:4321/users/alice/posts/3",
   "inReplyTo": "http://localhost:4321/users/alice/posts/2",

@@ -4,6 +4,11 @@
   "id": "http://localhost:4321/users/alice/posts/2",
   "attributedTo": "http://localhost:4321/users/alice",
   "content": "<p>This is the second post, a self-reply continuing the thread.</p>",
+  "contentMap": {
+    "en": "<p>This is the second post, a self-reply continuing the thread.</p>",
+    "ja": "<p>これは2番目の投稿で、スレッドを続ける自己リプライです。</p>",
+    "ko": "<p>이것은 두 번째 게시물로, 스레드를 이어가는 자기 답글입니다.</p>"
+  },
   "published": "2024-01-01T10:05:00Z",
   "url": "http://localhost:4321/users/alice/posts/2",
   "inReplyTo": "http://localhost:4321/users/alice/posts/1",
@@ -13,9 +18,7 @@
     "id": "http://localhost:4321/users/alice/posts/2#replies",
     "first": {
       "type": "CollectionPage",
-      "items": [
-        "http://localhost:4321/users/alice/posts/3"
-      ]
+      "items": ["http://localhost:4321/users/alice/posts/3"]
     }
   }
 }
