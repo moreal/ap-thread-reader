@@ -121,6 +121,19 @@ function ReadPage() {
     }
   }, [loaderData.pending, loaderData.thread, loaderData.error]);
 
+  // Update document.title dynamically for CSR mode
+  useEffect(() => {
+    if (data.thread && data.thread.length > 0) {
+      const authorName = data.thread[0].author?.name;
+      if (authorName) {
+        document.title = `${authorName}'s thread - Thread Reader`;
+      }
+    }
+    return () => {
+      document.title = "Thread Reader";
+    };
+  }, [data.thread]);
+
   if (loading) {
     return <LoadingPage />;
   }
