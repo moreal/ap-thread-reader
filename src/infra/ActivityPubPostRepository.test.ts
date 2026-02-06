@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createPostIdFromString } from "@/domain/values";
+import { LanguageString } from "@fedify/fedify";
 
 function createCompleteMockPost(overrides: Record<string, unknown> = {}) {
   return {
@@ -285,9 +286,9 @@ describe("ActivityPubPostRepository", () => {
     const mockPost = createCompleteMockPost({
       content: null,
       contents: [
-        { toString: () => "<p>Hello</p>", language: { toString: () => "en", compact: () => "en" } },
-        { toString: () => "<p>こんにちは</p>", language: { toString: () => "ja", compact: () => "ja" } },
-        { toString: () => "<p>안녕하세요</p>", language: { toString: () => "ko", compact: () => "ko" } },
+        new LanguageString("<p>Hello</p>", "en"),
+        new LanguageString("<p>こんにちは</p>", "ja"),
+        new LanguageString("<p>안녕하세요</p>", "ko"),
       ],
     });
 
@@ -334,8 +335,8 @@ describe("ActivityPubPostRepository", () => {
     const mockPost = createCompleteMockPost({
       content: null,
       contents: [
-        { toString: () => "<p>Hello</p>", language: { toString: () => "en", compact: () => "en" } },
-        { toString: () => "<p>こんにちは</p>", language: { toString: () => "ja", compact: () => "ja" } },
+        new LanguageString("<p>Hello</p>", "en"),
+        new LanguageString("<p>こんにちは</p>", "ja"),
       ],
     });
 
@@ -370,8 +371,8 @@ describe("ActivityPubPostRepository", () => {
     const mockPost = createCompleteMockPost({
       content: null,
       contents: [
-        { toString: () => "<p>Hello</p>", language: { toString: () => "en", compact: () => "en" } },
-        { toString: () => "<p>こんにちは</p>", language: { toString: () => "ja", compact: () => "ja" } },
+        new LanguageString("<p>Hello</p>", "en"),
+        new LanguageString("<p>こんにちは</p>", "ja"),
       ],
     });
 
@@ -409,8 +410,8 @@ describe("ActivityPubPostRepository", () => {
     const mockPost = createCompleteMockPost({
       summary: null,
       summaries: [
-        { toString: () => "Summary in English", language: { toString: () => "en", compact: () => "en" } },
-        { toString: () => "日本語の要約", language: { toString: () => "ja", compact: () => "ja" } },
+        new LanguageString("Summary in English", "en"),
+        new LanguageString("日本語の要約", "ja"),
       ],
     });
 
