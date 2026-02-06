@@ -35,7 +35,11 @@ export async function main(args: string[], options: CliOptions = {}): Promise<nu
   const repository = new ActivityPubPostRepository();
 
   try {
-    const thread = await getLongestThread(createPostIdFromString(url), repository, options.language);
+    const thread = await getLongestThread(
+      createPostIdFromString(url),
+      repository,
+      options.language,
+    );
 
     if (!thread) {
       cliLogger.error("No posts found in thread.");
