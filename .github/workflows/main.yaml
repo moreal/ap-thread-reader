@@ -31,6 +31,9 @@ jobs:
       - name: Check formatting
         run: yarn fmt --check
 
+      - name: Codegen
+        run: yarn lingui:compile
+
       - name: Run linting
         run: yarn lint
 
