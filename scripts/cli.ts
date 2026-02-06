@@ -5,6 +5,7 @@ const config = runCli();
 main([config.url.href], {
   verbose: config.verbose,
   separator: config.separator,
+  language: config.language,
 }).then((code) => {
   process.exit(code);
 });

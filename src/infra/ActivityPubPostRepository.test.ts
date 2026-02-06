@@ -1,11 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createPostIdFromString } from "@/domain/values";
+import { LanguageString } from "@fedify/fedify";
 
 function createCompleteMockPost(overrides: Record<string, unknown> = {}) {
   return {
     id: { href: "https://example.com/post/1" },
     attributionId: { href: "https://example.com/user/1" },
     content: { toString: () => "<p>Post content</p>" },
+    contents: [],
+    summary: null,
+    summaries: [],
     published: { toString: () => "2024-01-01T00:00:00Z" },
     replyTargetId: null,
     url: new URL("https://example.com/post/1"),
@@ -276,5 +280,168 @@ describe("ActivityPubPostRepository", () => {
 
     expect(post).not.toBeNull();
     expect(post?.summary).toBeNull();
+  });
+
+  it("language 파라미터로 특정 언어의 content를 추출해야 함", async () => {
+    const mockPost = createCompleteMockPost({
+      content: null,
+      contents: [
+        new LanguageString("<p>Hello</p>", "en"),
+        new LanguageString("<p>こんにちは</p>", "ja"),
+        new LanguageString("<p>안녕하세요</p>", "ko"),
+      ],
+    });
+
+    vi.doMock("@fedify/fedify", async (importOriginal) => {
+      const original = await importOriginal<typeof import("@fedify/fedify")>();
+      return {
+        ...original,
+        lookupObject: vi.fn().mockResolvedValue(mockPost),
+        Note: class MockNote {
+          static [Symbol.hasInstance](obj: unknown) {
+            return obj === mockPost;
+          }
+        },
+        Article: class MockArticle {
+          static [Symbol.hasInstance]() {
+            return false;
+          }
+        },
+        isActor: () => false,
+      };
+    });
+
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+
+    // 일본어 content 추출
+    const jaPost = await repository.findById(
+      createPostIdFromString("https://example.com/post/1"),
+      "ja",
+    );
+    expect(jaPost).not.toBeNull();
+    expect(jaPost?.content).toBe("<p>こんにちは</p>");
+
+    // 한국어 content 추출
+    const koPost = await repository.findById(
+      createPostIdFromString("https://example.com/post/1"),
+      "ko",
+    );
+    expect(koPost).not.toBeNull();
+    expect(koPost?.content).toBe("<p>안녕하세요</p>");
+  });
+
+  it("language 파라미터가 없으면 첫 번째 content를 반환해야 함", async () => {
+    const mockPost = createCompleteMockPost({
+      content: null,
+      contents: [
+        new LanguageString("<p>Hello</p>", "en"),
+        new LanguageString("<p>こんにちは</p>", "ja"),
+      ],
+    });
+
+    vi.doMock("@fedify/fedify", async (importOriginal) => {
+      const original = await importOriginal<typeof import("@fedify/fedify")>();
+      return {
+        ...original,
+        lookupObject: vi.fn().mockResolvedValue(mockPost),
+        Note: class MockNote {
+          static [Symbol.hasInstance](obj: unknown) {
+            return obj === mockPost;
+          }
+        },
+        Article: class MockArticle {
+          static [Symbol.hasInstance]() {
+            return false;
+          }
+        },
+        isActor: () => false,
+      };
+    });
+
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(createPostIdFromString("https://example.com/post/1"));
+
+    expect(post).not.toBeNull();
+    expect(post?.content).toBe("<p>Hello</p>");
+  });
+
+  it("지정된 언어가 없으면 첫 번째 content로 fallback해야 함", async () => {
+    const mockPost = createCompleteMockPost({
+      content: null,
+      contents: [
+        new LanguageString("<p>Hello</p>", "en"),
+        new LanguageString("<p>こんにちは</p>", "ja"),
+      ],
+    });
+
+    vi.doMock("@fedify/fedify", async (importOriginal) => {
+      const original = await importOriginal<typeof import("@fedify/fedify")>();
+      return {
+        ...original,
+        lookupObject: vi.fn().mockResolvedValue(mockPost),
+        Note: class MockNote {
+          static [Symbol.hasInstance](obj: unknown) {
+            return obj === mockPost;
+          }
+        },
+        Article: class MockArticle {
+          static [Symbol.hasInstance]() {
+            return false;
+          }
+        },
+        isActor: () => false,
+      };
+    });
+
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(
+      createPostIdFromString("https://example.com/post/1"),
+      "fr", // 프랑스어는 없음
+    );
+
+    expect(post).not.toBeNull();
+    expect(post?.content).toBe("<p>Hello</p>"); // 첫 번째로 fallback
+  });
+
+  it("language 파라미터로 특정 언어의 summary를 추출해야 함", async () => {
+    const mockPost = createCompleteMockPost({
+      summary: null,
+      summaries: [
+        new LanguageString("Summary in English", "en"),
+        new LanguageString("日本語の要約", "ja"),
+      ],
+    });
+
+    vi.doMock("@fedify/fedify", async (importOriginal) => {
+      const original = await importOriginal<typeof import("@fedify/fedify")>();
+      return {
+        ...original,
+        lookupObject: vi.fn().mockResolvedValue(mockPost),
+        Note: class MockNote {
+          static [Symbol.hasInstance](obj: unknown) {
+            return obj === mockPost;
+          }
+        },
+        Article: class MockArticle {
+          static [Symbol.hasInstance]() {
+            return false;
+          }
+        },
+        isActor: () => false,
+      };
+    });
+
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(
+      createPostIdFromString("https://example.com/post/1"),
+      "ja",
+    );
+
+    expect(post).not.toBeNull();
+    expect(post?.summary).toBe("日本語の要約");
   });
 });

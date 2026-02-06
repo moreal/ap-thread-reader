@@ -9,20 +9,23 @@ import type { ReadThreadResult } from "@/application/ReadThread";
 interface ReadSearchParams {
   url: string;
   ssr?: boolean;
+  language?: string;
 }
 
 interface LoaderResult extends ReadThreadResult {
   /** When true, data should be fetched on the client */
   pending?: boolean;
   url: string;
+  language?: string;
 }
 
 export const Route = createFileRoute("/read")({
   validateSearch: (search: Record<string, unknown>): ReadSearchParams => ({
     url: (search.url as string) || "",
     ssr: search.ssr === "true" || search.ssr === true,
+    language: (search.language as string) || undefined,
   }),
-  loaderDeps: ({ search }) => ({ url: search.url, ssr: search.ssr }),
+  loaderDeps: ({ search }) => ({ url: search.url, ssr: search.ssr, language: search.language }),
   loader: async ({ deps }): Promise<LoaderResult> => {
     if (!deps.url) {
       return { thread: null, error: "No URL provided", url: deps.url };
@@ -30,12 +33,12 @@ export const Route = createFileRoute("/read")({
 
     // Only fetch on server when ssr=true
     if (deps.ssr) {
-      const result = await fetchThreadData({ data: deps.url });
-      return { ...result, url: deps.url };
+      const result = await fetchThreadData({ data: { url: deps.url, language: deps.language } });
+      return { ...result, url: deps.url, language: deps.language };
     }
 
     // Otherwise, return pending state for client-side fetch
-    return { thread: null, error: null, pending: true, url: deps.url };
+    return { thread: null, error: null, pending: true, url: deps.url, language: deps.language };
   },
   head: ({ loaderData }) => {
     const meta: Array<{ name: string; content: string }> = [];
@@ -101,11 +104,11 @@ function ReadPage() {
   useEffect(() => {
     if (loaderData.pending && loaderData.url) {
       setLoading(true);
-      fetchThreadData({ data: loaderData.url })
+      fetchThreadData({ data: { url: loaderData.url, language: loaderData.language } })
         .then(setData)
         .finally(() => setLoading(false));
     }
-  }, [loaderData.pending, loaderData.url]);
+  }, [loaderData.pending, loaderData.url, loaderData.language]);
 
   // Sync with loader data when it changes (e.g., ssr=true case)
   useEffect(() => {

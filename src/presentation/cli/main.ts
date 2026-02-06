@@ -12,6 +12,8 @@ export interface CliOptions {
   verbose?: boolean;
   /** 구분자 */
   separator?: string;
+  /** 언어 코드 (예: 'en', 'ja', 'ko') */
+  language?: string;
 }
 
 /**
@@ -33,7 +35,7 @@ export async function main(args: string[], options: CliOptions = {}): Promise<nu
   const repository = new ActivityPubPostRepository();
 
   try {
-    const thread = await getLongestThread(createPostIdFromString(url), repository);
+    const thread = await getLongestThread(createPostIdFromString(url), repository, options.language);
 
     if (!thread) {
       cliLogger.error("No posts found in thread.");
@@ -73,6 +75,7 @@ export async function main(args: string[], options: CliOptions = {}): Promise<nu
 const parser = object({
   verbose: option("-v", "--verbose"),
   separator: optional(option("-s", "--separator", string())),
+  language: optional(option("-l", "--language", string())),
   url: argument(url()),
 });
 
