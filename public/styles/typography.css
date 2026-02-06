@@ -524,7 +524,17 @@ body {
 
 /* Locale Switcher */
 .locale-switcher {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.locale-switcher-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .locale-select {
@@ -546,6 +556,79 @@ body {
 .locale-select option {
   background-color: var(--color-background);
   color: var(--color-text);
+}
+
+/* Content Language Switcher */
+.content-language-switcher {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  margin-bottom: var(--spacing-sm);
+}
+
+.content-language-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.content-language-buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.content-language-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  background-color: var(--color-background);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease-out,
+    border-color 0.15s ease-out,
+    color 0.15s ease-out;
+}
+
+@media (hover: hover) {
+  .content-language-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.content-language-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.content-language-btn--active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+@media (hover: hover) {
+  .content-language-btn--active:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: white;
+  }
+}
+
+/* Content Language Fallback Badge */
+.content-language-fallback {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  padding: 0.125rem var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 /* Screen reader only */
@@ -646,6 +729,7 @@ body {
   .nav,
   .url-form,
   .locale-switcher,
+  .content-language-switcher,
   .skip-link,
   .retry-link {
     display: none !important;

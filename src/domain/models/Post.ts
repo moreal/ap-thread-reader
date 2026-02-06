@@ -29,4 +29,13 @@ export interface Post {
 
   /** 요약 또는 짧은 설명 (ActivityStreams summary 속성) */
   summary: string | null;
+
+  /** contentMap에 있는 언어 목록 */
+  availableLanguages: string[];
+
+  /** 실제 표시된 콘텐츠의 언어 */
+  contentLanguage: string | null;
+
+  /** fallback 여부 (요청한 언어가 없어서 대체된 경우 true) */
+  contentLanguageIsFallback: boolean;
 }

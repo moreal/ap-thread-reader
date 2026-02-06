@@ -51,6 +51,12 @@ const commonLookupObjectOptions: LookupObjectOptions = {
   contextLoader: cachedDocumentLoader,
 };
 
+interface ExtractedContent {
+  content: string;
+  resolvedLanguage: string | null;
+  isFallback: boolean;
+}
+
 /**
  * LanguageString 배열에서 특정 언어의 content를 추출합니다.
  * 지정된 언어가 없으면 첫 번째 항목을 반환합니다.
@@ -60,7 +66,7 @@ function extractLanguageContent(
   contentsArray: Note["contents"] | Article["contents"],
   language?: string,
   allowEmpty = false,
-): string {
+): ExtractedContent {
   // contents 배열이 있는 경우
   if (contentsArray && contentsArray.length > 0) {
     // 언어가 지정된 경우, 해당 언어의 content 찾기
@@ -74,25 +80,55 @@ function extractLanguageContent(
         return String(lang) === language;
       });
       if (languageContent) {
-        return String(languageContent.toString());
+        return {
+          content: String(languageContent.toString()),
+          resolvedLanguage: language,
+          isFallback: false,
+        };
       }
     }
     // 언어를 찾지 못했거나 지정되지 않은 경우, 첫 번째 항목 반환
     const firstContent = contentsArray[0];
     if (firstContent) {
-      return String(firstContent.toString());
+      const firstLang =
+        typeof firstContent === "object" && firstContent && "language" in firstContent
+          ? String(firstContent.language ?? "")
+          : null;
+      return {
+        content: String(firstContent.toString()),
+        resolvedLanguage: firstLang || null,
+        isFallback: language != null,
+      };
     }
   }
   // contents 배열이 없으면 단일 content 사용
   if (contentValue) {
-    return String(contentValue.toString());
+    return {
+      content: String(contentValue.toString()),
+      resolvedLanguage: null,
+      isFallback: language != null,
+    };
   }
   // 정상적인 Note/Article에서는 도달할 수 없는 경로
   if (!allowEmpty) {
     activitypubLogger.error`No content or contents found in ActivityPub object`;
     throw new Error("No content or contents found in ActivityPub object");
   }
-  return "";
+  return { content: "", resolvedLanguage: null, isFallback: false };
+}
+
+/**
+ * contentsArray에서 사용 가능한 언어 목록을 추출합니다.
+ */
+function getAvailableLanguages(contentsArray: Note["contents"] | Article["contents"]): string[] {
+  if (!contentsArray || contentsArray.length === 0) return [];
+  const languages: string[] = [];
+  for (const c of contentsArray) {
+    if (typeof c === "object" && c && "language" in c && c.language) {
+      languages.push(String(c.language));
+    }
+  }
+  return languages;
 }
 
 /**
@@ -147,13 +183,15 @@ export class ActivityPubPostRepository implements PostRepository {
       }
     }
 
-    const content = extractLanguageContent(obj.content, obj.contents, language);
+    const extracted = extractLanguageContent(obj.content, obj.contents, language);
     const published = obj.published;
     const publishedAt = published?.toString() ?? new Date().toISOString();
     const inReplyTo = obj.replyTargetId ? createPostId(obj.replyTargetId) : null;
     const objUrl = obj.url;
     const url = objUrl instanceof URL ? objUrl.href : typeof objUrl === "string" ? objUrl : null;
-    const summary = extractLanguageContent(obj.summary, obj.summaries, language, true) || null;
+    const summaryExtracted = extractLanguageContent(obj.summary, obj.summaries, language, true);
+    const summary = summaryExtracted.content || null;
+    const availableLanguages = getAvailableLanguages(obj.contents);
 
     // apObjectCache에 저장 (_apObjectRef 대체)
     this.apObjectCache.set(id.href, obj);
@@ -162,11 +200,14 @@ export class ActivityPubPostRepository implements PostRepository {
       id,
       authorId,
       author,
-      content,
+      content: extracted.content,
       publishedAt,
       inReplyTo,
       url,
       summary,
+      availableLanguages,
+      contentLanguage: extracted.resolvedLanguage,
+      contentLanguageIsFallback: extracted.isFallback,
     };
   }
 

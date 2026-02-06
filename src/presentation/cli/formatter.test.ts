@@ -24,6 +24,9 @@ function createMockPost(overrides: MockPostOverrides = {}): Post {
     inReplyTo: overrides.inReplyTo ? createPostIdFromString(overrides.inReplyTo) : null,
     url: overrides.url ?? "https://example.com/@alice/1",
     summary: null,
+    availableLanguages: [],
+    contentLanguage: null,
+    contentLanguageIsFallback: false,
   };
 }
 

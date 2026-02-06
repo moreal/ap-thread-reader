@@ -19,6 +19,9 @@ function createMockPost(overrides: MockPostOverrides = {}): Post {
     inReplyTo: null,
     url: "https://example.com/@alice/1",
     summary: null,
+    availableLanguages: [],
+    contentLanguage: null,
+    contentLanguageIsFallback: false,
   };
 }
 

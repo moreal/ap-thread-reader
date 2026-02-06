@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react";
 import type { SerializableThread } from "@/application/dto";
 import { PostContent } from "./PostContent";
 
@@ -54,7 +55,13 @@ export function ThreadView({ thread }: ThreadViewProps) {
         )}
       </header>
       {thread.map((post, index) => (
-        <PostContent key={post.id} post={post} index={index} />
+        <PostContent key={post.id} post={post} index={index}>
+          {post.contentLanguageIsFallback && post.contentLanguage && (
+            <span className="content-language-fallback">
+              {post.contentLanguage} (<Trans id="Fallback" message="Fallback" />)
+            </span>
+          )}
+        </PostContent>
       ))}
     </article>
   );

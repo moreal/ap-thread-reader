@@ -6,6 +6,7 @@ import { toSerializableThread, type SerializableThread } from "./dto";
 export interface ReadThreadResult {
   thread: SerializableThread | null;
   error: string | null;
+  availableContentLanguages: string[];
 }
 
 /**
@@ -18,24 +19,38 @@ export async function readThread(
   language?: string,
 ): Promise<ReadThreadResult> {
   if (!url || !isValidPostUrl(url)) {
-    return { thread: null, error: "Invalid URL" };
+    return { thread: null, error: "Invalid URL", availableContentLanguages: [] };
   }
 
   const postId = tryCreatePostId(url);
   if (!postId) {
-    return { thread: null, error: "Invalid URL" };
+    return { thread: null, error: "Invalid URL", availableContentLanguages: [] };
   }
 
   try {
     const thread = await getLongestThread(postId, repository, language);
 
     if (!thread) {
-      return { thread: null, error: "No posts found in thread" };
+      return { thread: null, error: "No posts found in thread", availableContentLanguages: [] };
     }
 
-    return { thread: toSerializableThread(thread), error: null };
+    const serialized = toSerializableThread(thread);
+
+    // 스레드 전체의 사용 가능 언어를 union으로 계산
+    const langSet = new Set<string>();
+    for (const post of thread) {
+      for (const lang of post.availableLanguages) {
+        langSet.add(lang);
+      }
+    }
+
+    return {
+      thread: serialized,
+      error: null,
+      availableContentLanguages: [...langSet],
+    };
   } catch (error) {
     console.error("Failed to fetch thread:", error);
-    return { thread: null, error: "Failed to fetch thread" };
+    return { thread: null, error: "Failed to fetch thread", availableContentLanguages: [] };
   }
 }

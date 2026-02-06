@@ -21,6 +21,7 @@ export function LocaleSwitcher() {
 
   return (
     <div className="locale-switcher">
+      <span className="locale-switcher-label">UI</span>
       <label htmlFor="locale-select" className="sr-only">
         Language
       </label>

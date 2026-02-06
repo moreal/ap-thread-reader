@@ -1,8 +1,9 @@
-import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Trans } from "@lingui/react";
 import { useEffect, useState } from "react";
 import { ThreadView } from "@/presentation/web/components/ThreadView";
 import { LocaleSwitcher } from "@/presentation/web/components/LocaleSwitcher";
+import { ContentLanguageSwitcher } from "@/presentation/web/components/ContentLanguageSwitcher";
 import { fetchThreadData } from "@/lib/api.functions";
 import type { ReadThreadResult } from "@/application/ReadThread";
 
@@ -17,6 +18,7 @@ interface LoaderResult extends ReadThreadResult {
   pending?: boolean;
   url: string;
   language?: string;
+  availableContentLanguages: string[];
 }
 
 export const Route = createFileRoute("/read")({
@@ -28,7 +30,12 @@ export const Route = createFileRoute("/read")({
   loaderDeps: ({ search }) => ({ url: search.url, ssr: search.ssr, language: search.language }),
   loader: async ({ deps }): Promise<LoaderResult> => {
     if (!deps.url) {
-      return { thread: null, error: "No URL provided", url: deps.url };
+      return {
+        thread: null,
+        error: "No URL provided",
+        url: deps.url,
+        availableContentLanguages: [],
+      };
     }
 
     // Only fetch on server when ssr=true
@@ -38,7 +45,14 @@ export const Route = createFileRoute("/read")({
     }
 
     // Otherwise, return pending state for client-side fetch
-    return { thread: null, error: null, pending: true, url: deps.url, language: deps.language };
+    return {
+      thread: null,
+      error: null,
+      pending: true,
+      url: deps.url,
+      language: deps.language,
+      availableContentLanguages: [],
+    };
   },
   head: ({ loaderData }) => {
     const meta: Array<{ name: string; content: string } | { title: string }> = [];
@@ -97,10 +111,12 @@ function LoadingPage() {
 function ReadPage() {
   const loaderData = Route.useLoaderData();
   const location = useLocation();
+  const navigate = useNavigate();
   const fromIndex = (location.state as { fromIndex?: boolean })?.fromIndex;
   const [data, setData] = useState<ReadThreadResult>({
     thread: loaderData.thread,
     error: loaderData.error,
+    availableContentLanguages: loaderData.availableContentLanguages ?? [],
   });
   const [loading, setLoading] = useState(loaderData.pending ?? false);
 
@@ -116,10 +132,19 @@ function ReadPage() {
   // Sync with loader data when it changes (e.g., ssr=true case)
   useEffect(() => {
     if (!loaderData.pending) {
-      setData({ thread: loaderData.thread, error: loaderData.error });
+      setData({
+        thread: loaderData.thread,
+        error: loaderData.error,
+        availableContentLanguages: loaderData.availableContentLanguages ?? [],
+      });
       setLoading(false);
     }
-  }, [loaderData.pending, loaderData.thread, loaderData.error]);
+  }, [
+    loaderData.pending,
+    loaderData.thread,
+    loaderData.error,
+    loaderData.availableContentLanguages,
+  ]);
 
   // Update document.title dynamically for CSR mode
   useEffect(() => {
@@ -133,6 +158,14 @@ function ReadPage() {
       document.title = "Thread Reader";
     };
   }, [data.thread]);
+
+  const handleContentLanguageChange = (lang: string) => {
+    navigate({
+      to: "/read",
+      search: { url: loaderData.url, ssr: undefined, language: lang },
+      replace: true,
+    });
+  };
 
   if (loading) {
     return <LoadingPage />;
@@ -155,6 +188,12 @@ function ReadPage() {
         </Link>
         <LocaleSwitcher />
       </header>
+
+      <ContentLanguageSwitcher
+        availableLanguages={data.availableContentLanguages}
+        currentLanguage={loaderData.language}
+        onLanguageChange={handleContentLanguageChange}
+      />
 
       <main id="main-content" className="thread-content">
         {error && (

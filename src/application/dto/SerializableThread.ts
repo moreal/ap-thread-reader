@@ -15,6 +15,9 @@ export interface SerializablePost {
   inReplyTo: string | null;
   url: string | null;
   summary: string | null;
+  availableLanguages: string[];
+  contentLanguage: string | null;
+  contentLanguageIsFallback: boolean;
 }
 
 /**
@@ -35,6 +38,9 @@ export function toSerializablePost(post: Post): SerializablePost {
     inReplyTo: post.inReplyTo?.href ?? null,
     url: post.url,
     summary: post.summary,
+    availableLanguages: post.availableLanguages,
+    contentLanguage: post.contentLanguage,
+    contentLanguageIsFallback: post.contentLanguageIsFallback,
   };
 }
 
@@ -58,6 +64,9 @@ export function fromSerializablePost(post: SerializablePost): Post {
     inReplyTo: post.inReplyTo ? createPostIdFromString(post.inReplyTo) : null,
     url: post.url,
     summary: post.summary,
+    availableLanguages: post.availableLanguages,
+    contentLanguage: post.contentLanguage,
+    contentLanguageIsFallback: post.contentLanguageIsFallback,
   };
 }
 

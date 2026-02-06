@@ -106,3 +106,11 @@ msgstr "スレッドリーダー"
 #: src/routes/read.tsx:128
 msgid "Try another URL"
 msgstr "別のURLを試す"
+
+#. js-lingui-explicit-id
+msgid "Content Language"
+msgstr "コンテンツ言語"
+
+#. js-lingui-explicit-id
+msgid "Fallback"
+msgstr "フォールバック"
