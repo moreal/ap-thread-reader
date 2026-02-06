@@ -39,7 +39,7 @@ export const Route = createFileRoute("/read")({
   },
   head: ({ loaderData }) => {
     const meta: Array<{ name: string; content: string }> = [];
-
+    
     // Add description meta tag from thread summary if available
     if (loaderData?.thread && loaderData.thread.length > 0) {
       const firstPost = loaderData.thread[0];
@@ -50,7 +50,7 @@ export const Route = createFileRoute("/read")({
         });
       }
     }
-
+    
     return { meta };
   },
   pendingComponent: LoadingPage,
