@@ -41,11 +41,14 @@ export const Route = createFileRoute("/read")({
     return { thread: null, error: null, pending: true, url: deps.url, language: deps.language };
   },
   head: ({ loaderData }) => {
-    const meta: Array<{ name: string; content: string }> = [];
+    const meta: Array<{ name: string; content: string } | { title: string }> = [];
 
-    // Add description meta tag from thread summary if available
     if (loaderData?.thread && loaderData.thread.length > 0) {
       const firstPost = loaderData.thread[0];
+      const authorName = firstPost.author?.name;
+      if (authorName) {
+        meta.push({ title: `${authorName}'s thread - Thread Reader` });
+      }
       if (firstPost.summary) {
         meta.push({
           name: "description",
