@@ -15,18 +15,18 @@ Many Fediverse platforms impose character limits per post, leading users to writ
 
 ## Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| Language | TypeScript |
-| Runtime | Node.js 24 |
+| Category           | Technology                    |
+| ------------------ | ----------------------------- |
+| Language           | TypeScript                    |
+| Runtime            | Node.js 24                    |
 | ActivityPub Client | [Fedify](https://fedify.dev/) |
-| Frontend | React 19 |
-| Meta Framework | TanStack Start |
-| Bundler | Vite 7 (with Rolldown) |
-| Testing | Vitest |
-| Package Manager | Yarn 4 |
-| i18n | Lingui |
-| Deployment | Fly.io |
+| Frontend           | React 19                      |
+| Meta Framework     | TanStack Start                |
+| Bundler            | Vite 7 (with Rolldown)        |
+| Testing            | Vitest                        |
+| Package Manager    | Yarn 4                        |
+| i18n               | Lingui                        |
+| Deployment         | Fly.io                        |
 
 ## Getting Started
 
