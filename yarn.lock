@@ -966,9 +966,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fedify/fedify@npm:^1.3.0":
-  version: 1.10.2
-  resolution: "@fedify/fedify@npm:1.10.2"
+"@fedify/fedify@npm:^1.10.3":
+  version: 1.10.3
+  resolution: "@fedify/fedify@npm:1.10.3"
   dependencies:
     "@cfworker/json-schema": "npm:^4.1.1"
     "@js-temporal/polyfill": "npm:^0.5.1"
@@ -990,7 +990,7 @@ __metadata:
     uri-template-router: "npm:^1.0.0"
     url-template: "npm:^3.1.1"
     urlpattern-polyfill: "npm:^10.1.0"
-  checksum: 10c0/db4af498894684b10c4dacdfd7b2649a6675571fdaa851008eb077dd8f23ec6dd27ae9a66932058510fbbdec19b31821450479174e6f9427f4c1bc5bcf15e740
+  checksum: 10c0/9a89252762b0531dde2525a64ace16a6290d72b0d7a310a7d21aebd36afc08a62dd6eb8b6d78309fde2d699492872afe8281a0b9abbdbd97a2badc8e382bc411
   languageName: node
   linkType: hard
 
@@ -2964,7 +2964,7 @@ __metadata:
   resolution: "ap-thread-reader@workspace:."
   dependencies:
     "@babel/core": "npm:^7.28.6"
-    "@fedify/fedify": "npm:^1.3.0"
+    "@fedify/fedify": "npm:^1.10.3"
     "@js-temporal/polyfill": "npm:^0.5.1"
     "@lingui/babel-plugin-lingui-macro": "npm:^5.9.0"
     "@lingui/cli": "npm:^5.0.0"
