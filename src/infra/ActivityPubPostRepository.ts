@@ -132,6 +132,10 @@ function getAvailableLanguages(contentsArray: Note["contents"] | Article["conten
  * ActivityPub 기반 PostRepository 구현
  */
 export class ActivityPubPostRepository implements PostRepository {
+  // 인스턴스 레벨 캐시 (repository와 함께 GC)
+  private authorCache = new Map<string, Author>();
+  private apObjectCache = new Map<string, Note | Article>();
+
   /**
    * Fedify Object를 도메인 Post로 변환합니다.
    */
@@ -154,24 +158,27 @@ export class ActivityPubPostRepository implements PostRepository {
       return null;
     }
 
-    let author: Author | null = null;
-    try {
-      const actor = await obj.getAttribution();
-      if (actor && isActor(actor)) {
-        const actorUrl = actor.url;
-        author = {
-          id: authorId,
-          name: actor.name?.toString() ?? actor.preferredUsername?.toString() ?? authorId,
-          url:
-            actorUrl instanceof URL
-              ? actorUrl.href
-              : typeof actorUrl === "string"
-                ? actorUrl
-                : null,
-        };
+    let author: Author | null = this.authorCache.get(authorId) ?? null;
+    if (!author) {
+      try {
+        const actor = await obj.getAttribution();
+        if (actor && isActor(actor)) {
+          const actorUrl = actor.url;
+          author = {
+            id: authorId,
+            name: actor.name?.toString() ?? actor.preferredUsername?.toString() ?? authorId,
+            url:
+              actorUrl instanceof URL
+                ? actorUrl.href
+                : typeof actorUrl === "string"
+                  ? actorUrl
+                  : null,
+          };
+          this.authorCache.set(authorId, author);
+        }
+      } catch (error) {
+        activitypubLogger.debug`Failed to fetch author for ${id}: ${error}`;
       }
-    } catch (error) {
-      activitypubLogger.debug`Failed to fetch author for ${id}: ${error}`;
     }
 
     const extracted = extractLanguageContent(obj.content, obj.contents, language);
@@ -214,6 +221,10 @@ export class ActivityPubPostRepository implements PostRepository {
         return null;
       }
 
+      if (obj instanceof Note || obj instanceof Article) {
+        this.apObjectCache.set(postId.toString(), obj);
+      }
+
       const post = await this.toPost(obj as APObject, language);
       if (post) {
         activitypubLogger.debug`Successfully fetched post: ${postId.toString()}`;
@@ -248,22 +259,30 @@ export class ActivityPubPostRepository implements PostRepository {
     const pageItems: APObject[] = [];
     let itemCount = 0;
 
-    try {
-      for await (const item of traverseCollection(repliesCollection, commonLookupObjectOptions)) {
-        itemCount++;
-        activitypubLogger.debug`Reply item ${itemCount}: ${item?.constructor.name ?? "null"}, id: ${item?.id?.href ?? "no id"}`;
+    const firstPage = await repliesCollection.getFirst(commonLookupObjectOptions);
+    if (firstPage) {
+      activitypubLogger.debug`Trying paginated replies for: ${postId}`;
 
-        if (item instanceof Note || item instanceof Article) {
-          if (authorFilter && item.attributionId?.href !== authorFilter) {
-            activitypubLogger.debug`Skipping reply from different author: ${item.attributionId?.href}`;
-            continue;
+      try {
+        for await (const item of traverseCollection(firstPage, commonLookupObjectOptions)) {
+          itemCount++;
+          activitypubLogger.debug`Reply item ${itemCount}: ${item?.constructor.name ?? "null"}, id: ${item?.id?.href ?? "no id"}`;
+
+          if (item instanceof Note || item instanceof Article) {
+            if (authorFilter && item.attributionId?.href !== authorFilter) {
+              activitypubLogger.debug`Skipping reply from different author: ${item.attributionId?.href}`;
+              continue;
+            }
+
+            if (item.id) {
+              this.apObjectCache.set(item.id.href, item);
+            }
+            pageItems.push(item);
           }
-
-          pageItems.push(item);
         }
+      } catch (error) {
+        activitypubLogger.debug`Error during reply traversal for ${postId}, returning ${pageItems.length} items collected so far: ${error}`;
       }
-    } catch (error) {
-      activitypubLogger.debug`Error during reply traversal for ${postId}, returning ${pageItems.length} items collected so far: ${error}`;
     }
 
     // 병렬로 toPost 변환
@@ -284,6 +303,11 @@ export class ActivityPubPostRepository implements PostRepository {
     activitypubLogger.debug`Fetching replies for: ${post.id.toString()}`;
 
     try {
+      const cached = this.apObjectCache.get(post.id.toString());
+      if (cached) {
+        return await this.fetchRepliesFromObject(cached, authorFilter, language);
+      }
+
       const looked = await lookupObject(post.id, commonLookupObjectOptions);
       if (!looked) {
         activitypubLogger.warn`Post not found when fetching replies: ${post.id.toString()}`;

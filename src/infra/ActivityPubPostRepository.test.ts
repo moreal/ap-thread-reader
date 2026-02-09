@@ -36,6 +36,7 @@ describe("ActivityPubPostRepository", () => {
     };
 
     const mockFirstPage = {
+      getFirst: async () => null,
       getItems: async function* () {
         yield mockReplyNote;
       },
@@ -95,6 +96,7 @@ describe("ActivityPubPostRepository", () => {
     };
 
     const mockFirstPage = {
+      getFirst: async () => null,
       getItems: async function* () {
         yield mockReplyNote;
       },
@@ -155,10 +157,12 @@ describe("ActivityPubPostRepository", () => {
 
     // First page yields one item then the second page throws a fetch error
     const mockFirstPage = {
+      getFirst: async () => null,
       getItems: async function* () {
         yield mockReplyNote;
       },
       getNext: async () => ({
+        getFirst: async () => null,
         getItems: async function* () {
           throw new TypeError("fetch failed");
         },
