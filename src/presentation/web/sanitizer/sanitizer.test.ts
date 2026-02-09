@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { noopSanitizer } from "./types";
-import { createDOMPurifySanitizer, defaultSanitizer } from "./domPurify";
+import { createDOMPurifySanitizer } from "./domPurify";
 
 describe("noopSanitizer", () => {
   it("입력을 그대로 반환해야 함", () => {
@@ -66,11 +66,11 @@ describe("createDOMPurifySanitizer", () => {
   });
 });
 
-describe("defaultSanitizer", () => {
-  it("기본 sanitizer가 동작해야 함", () => {
+describe("createDOMPurifySanitizer default options", () => {
+  it("기본 설정의 sanitizer가 동작해야 함", () => {
+    const sanitizer = createDOMPurifySanitizer();
     const input = '<script>alert("xss")</script><p>Hello</p>';
-    const result = defaultSanitizer(input);
-
+    const result = sanitizer(input);
     expect(result).not.toContain("<script>");
     expect(result).toContain("<p>Hello</p>");
   });
