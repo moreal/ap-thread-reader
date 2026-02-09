@@ -6,4 +6,3 @@ export {
   DEFAULT_ALLOWED_ATTRIBUTES,
   noopSanitizer,
 } from "./types";
-export { createDOMPurifySanitizer, defaultSanitizer } from "./domPurify";
