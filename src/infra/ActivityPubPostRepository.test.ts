@@ -39,7 +39,7 @@ describe("ActivityPubPostRepository", () => {
       getItems: async function* () {
         yield mockReplyNote;
       },
-      nextId: null,
+      getNext: async () => null,
     };
 
     const mockRepliesCollection = {
@@ -98,7 +98,7 @@ describe("ActivityPubPostRepository", () => {
       getItems: async function* () {
         yield mockReplyNote;
       },
-      nextId: null,
+      getNext: async () => null,
     };
 
     const mockRepliesCollection = {
@@ -139,6 +139,71 @@ describe("ActivityPubPostRepository", () => {
       const replies = await repository.findReplies(post);
       expect(replies).toHaveLength(1);
       expect(replies[0].content).toBe("<p>Paginated reply</p>");
+    }
+  });
+
+  it("reply traversal 중 fetch 에러가 발생해도 이미 수집된 답글을 반환해야 함", async () => {
+    const mockReplyNote = {
+      id: { href: "https://example.com/reply/1" },
+      attributionId: { href: "https://example.com/user/1" },
+      content: { toString: () => "<p>Successful reply</p>" },
+      published: { toString: () => "2024-01-01T00:00:00Z" },
+      replyTargetId: { href: "https://example.com/post/1" },
+      url: new URL("https://example.com/reply/1"),
+      getAttribution: async () => null,
+    };
+
+    // First page yields one item then the second page throws a fetch error
+    const mockFirstPage = {
+      getItems: async function* () {
+        yield mockReplyNote;
+      },
+      getNext: async () => ({
+        getItems: async function* () {
+          throw new TypeError("fetch failed");
+        },
+        getNext: async () => null,
+      }),
+    };
+
+    const mockRepliesCollection = {
+      id: { href: "https://example.com/post/1#replies" },
+      getFirst: async () => mockFirstPage,
+    };
+
+    const mockPost = createCompleteMockPost({
+      getReplies: async () => mockRepliesCollection,
+    });
+
+    vi.doMock("@fedify/fedify", async (importOriginal) => {
+      const original = await importOriginal<typeof import("@fedify/fedify")>();
+      return {
+        ...original,
+        lookupObject: vi.fn().mockResolvedValue(mockPost),
+        Note: class MockNote {
+          static [Symbol.hasInstance](obj: unknown) {
+            return obj === mockReplyNote || obj === mockPost;
+          }
+        },
+        Article: class MockArticle {
+          static [Symbol.hasInstance]() {
+            return false;
+          }
+        },
+        isActor: () => false,
+      };
+    });
+
+    const { ActivityPubPostRepository } = await import("./ActivityPubPostRepository");
+    const repository = new ActivityPubPostRepository();
+    const post = await repository.findById(createPostIdFromString("https://example.com/post/1"));
+
+    expect(post).not.toBeNull();
+    if (post) {
+      const replies = await repository.findReplies(post);
+      expect(replies).toHaveLength(1);
+      expect(replies[0].id.href).toBe("https://example.com/reply/1");
+      expect(replies[0].content).toBe("<p>Successful reply</p>");
     }
   });
 

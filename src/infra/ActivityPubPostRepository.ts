@@ -18,9 +18,6 @@ import { createPostId } from "@/domain/values";
 import type { PostRepository } from "@/domain/ports";
 import { activitypubLogger } from "@/logging";
 
-// Author 캐시 - 동일 작성자를 반복 fetch하지 않도록 캐싱
-const authorCache = new Map<string, Author>();
-
 // 전역 HTTP Agent 최적화 - Keep-Alive 연결 재사용
 const agent = new Agent({
   keepAliveTimeout: 30_000, // 30초 동안 연결 유지
@@ -135,8 +132,6 @@ function getAvailableLanguages(contentsArray: Note["contents"] | Article["conten
  * ActivityPub 기반 PostRepository 구현
  */
 export class ActivityPubPostRepository implements PostRepository {
-  private apObjectCache = new Map<string, Note | Article>();
-
   /**
    * Fedify Object를 도메인 Post로 변환합니다.
    */
@@ -159,28 +154,24 @@ export class ActivityPubPostRepository implements PostRepository {
       return null;
     }
 
-    // Fetch author information (with cache)
-    let author: Author | null = authorCache.get(authorId) ?? null;
-    if (!author) {
-      try {
-        const actor = await obj.getAttribution();
-        if (actor && isActor(actor)) {
-          const actorUrl = actor.url;
-          author = {
-            id: authorId,
-            name: actor.name?.toString() ?? actor.preferredUsername?.toString() ?? authorId,
-            url:
-              actorUrl instanceof URL
-                ? actorUrl.href
-                : typeof actorUrl === "string"
-                  ? actorUrl
-                  : null,
-          };
-          authorCache.set(authorId, author);
-        }
-      } catch (error) {
-        activitypubLogger.debug`Failed to fetch author for ${id}: ${error}`;
+    let author: Author | null = null;
+    try {
+      const actor = await obj.getAttribution();
+      if (actor && isActor(actor)) {
+        const actorUrl = actor.url;
+        author = {
+          id: authorId,
+          name: actor.name?.toString() ?? actor.preferredUsername?.toString() ?? authorId,
+          url:
+            actorUrl instanceof URL
+              ? actorUrl.href
+              : typeof actorUrl === "string"
+                ? actorUrl
+                : null,
+        };
       }
+    } catch (error) {
+      activitypubLogger.debug`Failed to fetch author for ${id}: ${error}`;
     }
 
     const extracted = extractLanguageContent(obj.content, obj.contents, language);
@@ -192,9 +183,6 @@ export class ActivityPubPostRepository implements PostRepository {
     const summaryExtracted = extractLanguageContent(obj.summary, obj.summaries, language, true);
     const summary = summaryExtracted.content || null;
     const availableLanguages = getAvailableLanguages(obj.contents);
-
-    // apObjectCache에 저장 (_apObjectRef 대체)
-    this.apObjectCache.set(id.href, obj);
 
     return {
       id,
@@ -257,21 +245,16 @@ export class ActivityPubPostRepository implements PostRepository {
 
     activitypubLogger.debug`Replies collection id: ${repliesCollection.id?.href ?? "no id"}`;
 
-    const posts: Post[] = [];
+    const pageItems: APObject[] = [];
     let itemCount = 0;
 
-    const firstPage = await repliesCollection.getFirst(commonLookupObjectOptions);
-    if (firstPage) {
-      activitypubLogger.debug`Trying paginated replies for: ${postId.toString()}`;
-      const pageItems: APObject[] = [];
-
-      for await (const item of traverseCollection(firstPage)) {
+    try {
+      for await (const item of traverseCollection(repliesCollection, commonLookupObjectOptions)) {
         itemCount++;
         activitypubLogger.debug`Reply item ${itemCount}: ${item?.constructor.name ?? "null"}, id: ${item?.id?.href ?? "no id"}`;
 
         if (item instanceof Note || item instanceof Article) {
           if (authorFilter && item.attributionId?.href !== authorFilter) {
-            // authorFilter가 있으면 toPost 변환 전에 미리 필터링
             activitypubLogger.debug`Skipping reply from different author: ${item.attributionId?.href}`;
             continue;
           }
@@ -279,13 +262,17 @@ export class ActivityPubPostRepository implements PostRepository {
           pageItems.push(item);
         }
       }
-      // 병렬로 toPost 변환
-      const results = await Promise.all(pageItems.map((item) => this.toPost(item, language)));
-      for (const post of results) {
-        if (post) {
-          posts.push(post);
-          activitypubLogger.debug`Converted reply to post: ${post.id.toString()}`;
-        }
+    } catch (error) {
+      activitypubLogger.debug`Error during reply traversal for ${postId}, returning ${pageItems.length} items collected so far: ${error}`;
+    }
+
+    // 병렬로 toPost 변환
+    const posts: Post[] = [];
+    const results = await Promise.all(pageItems.map((item) => this.toPost(item, language)));
+    for (const post of results) {
+      if (post) {
+        posts.push(post);
+        activitypubLogger.debug`Converted reply to post: ${post.id.toString()}`;
       }
     }
 
@@ -297,23 +284,16 @@ export class ActivityPubPostRepository implements PostRepository {
     activitypubLogger.debug`Fetching replies for: ${post.id.toString()}`;
 
     try {
-      // apObjectCache에서 재사용하여 lookupObject RTT 제거
-      let obj: Note | Article | null = this.apObjectCache.get(post.id.href) ?? null;
-      if (!obj) {
-        // fallback: lookupObject로 다시 fetch
-        const looked = await lookupObject(post.id, commonLookupObjectOptions);
-        if (!looked) {
-          activitypubLogger.warn`Post not found when fetching replies: ${post.id.toString()}`;
-          return [];
-        }
-        if (!(looked instanceof Note) && !(looked instanceof Article)) {
-          activitypubLogger.warn`Object is not a Note or Article: ${post.id.toString()}`;
-          return [];
-        }
-        obj = looked;
+      const looked = await lookupObject(post.id, commonLookupObjectOptions);
+      if (!looked) {
+        activitypubLogger.warn`Post not found when fetching replies: ${post.id.toString()}`;
+        return [];
       }
-
-      return await this.fetchRepliesFromObject(obj, authorFilter, language);
+      if (!(looked instanceof Note) && !(looked instanceof Article)) {
+        activitypubLogger.warn`Object is not a Note or Article: ${post.id.toString()}`;
+        return [];
+      }
+      return await this.fetchRepliesFromObject(looked, authorFilter, language);
     } catch (error) {
       activitypubLogger.error`Failed to fetch replies for ${post.id.toString()}: ${error}`;
       return [];
